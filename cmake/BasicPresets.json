@@ -1,0 +1,16 @@
+﻿{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Common values for all systems.",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/install/${presetName}",
+            "cacheVariables": {
+                "SILKIT_VERSION": "4.0.50"
+            }
+        }
+    ]
+}

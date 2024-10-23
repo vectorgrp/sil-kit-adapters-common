@@ -1,0 +1,7 @@
+﻿{
+  "version": 4,
+  "include": [
+    "cmake/LinuxPresets.json",
+    "cmake/WindowsPresets.json"
+  ]
+}

@@ -1,0 +1,84 @@
+﻿{
+    "version": 4,
+    "include": ["BasicPresets.json"],
+    "configurePresets": [
+        {
+            "name": "windows-base",
+            "description": "Target Windows Operating System",
+            "inherits": "base",
+            "hidden": true,
+            "cacheVariables": {
+                "SILKIT_FLAVOR": "Win-x86_64-VS2017"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
+                    "rsyncCommandArgs": [ "--exclude", "_build" ]
+                }
+            }
+        },
+        {
+            "name": "windows-debug",
+            "displayName": "Windows Debug",
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-release",
+            "displayName": "Windows Release",
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows-base",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "windows-debug",
+            "inherits": "windows-base",
+            "configurePreset": "windows-debug"
+        },
+        {
+            "name": "windows-release",
+            "inherits": "windows-base",
+            "configurePreset": "windows-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "windows-base",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "windows-debug",
+            "inherits": "windows-base",
+            "configurePreset": "windows-debug"
+        },
+        {
+            "name": "windows-release",
+            "inherits": "windows-base",
+            "configurePreset": "windows-release"
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-# Vector SIL Kit Adapters common repository
+# Vector SIL Kit Adapters Common repository
 This collection of source code represents parts which are used in several Adapters
 of [Vector SIL Kit](https://github.com/vectorgrp/sil-kit/). It can be built using
 ``cmake`` but is intended to be included in a superproject seamlessly.
@@ -8,9 +8,9 @@ If you are developping this repository without it being included in a superproje
 via git submodule, you can still compile it by following the instructions below:
 
     git submodule update --init --recursive
-    mkdir _build
-    cmake -S. -B_build --preset=linux-release -DSILKIT_PACKAGE_DIR=/path/to/SilKit-x.y.z-$platform/
-    cmake --build _build --parallel
+    mkdir build
+    cmake -S. -Bbuild -DSILKIT_PACKAGE_DIR=/path/to/SilKit-x.y.z-$platform/ -D CMAKE_BUILD_TYPE=Release
+    cmake --build build --parallel --config Release
 
 This would check if the library does compile in a closed environment, but does not
 produce a library for it.

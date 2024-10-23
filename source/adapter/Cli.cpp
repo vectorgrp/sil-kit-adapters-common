@@ -1,0 +1,23 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
+#include "adapter/Cli.hpp"
+
+#include <future>
+#include <iostream>
+
+#include "adapter/SignalHandler.hpp"
+
+void adapters::promptForExit()
+{
+    std::promise<int> signalPromise;
+    auto signalValue = signalPromise.get_future();
+    adapters::RegisterSignalHandler([&signalPromise](auto sigNum) {
+        signalPromise.set_value(sigNum);
+        });
+
+    std::cout << "Press CTRL + C to stop the process..." << std::endl;
+
+    signalValue.wait();
+
+    std::cout << "\nSignal " << signalValue.get() << " received!" << std::endl;
+    std::cout << "Exiting..." << std::endl;
+}
