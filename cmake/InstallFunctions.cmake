@@ -83,8 +83,19 @@ endfunction()
 
 function( install_silkit_lib output_dir library_dir )
     if(WIN32)
-        install_lib_windows( ${output_dir}/SilKit.dll )
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(SILKIT_DLL_NAME "SilKit.dll")
+        else() # Debug or RelWithDebInfo
+            set(SILKIT_DLL_NAME "SilKitd.dll")
+        endif()
+        install_lib_windows( ${output_dir}/${SILKIT_DLL_NAME} )    # Set SIL Kit lib name
     else()
+        # Set SIL Kit lib name
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(SILKIT_SO_NAME "libSilKit.so")
+        else() # Debug or RelWithDebInfo
+            set(SILKIT_SO_NAME "libSilKitd.so")
+        endif()
         install_lib_linux( ${library_dir}/libSilKit.so )
     endif()
 endfunction()
