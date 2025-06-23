@@ -96,7 +96,7 @@ function( install_silkit_lib output_dir library_dir )
         else() # Debug or RelWithDebInfo
             set(SILKIT_SO_NAME "libSilKitd.so")
         endif()
-        install_lib_linux( ${library_dir}/libSilKit.so )
+        install_lib_linux( ${library_dir}/${SILKIT_SO_NAME} )
     endif()
 endfunction()
 
