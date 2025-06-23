@@ -139,3 +139,20 @@ function( fix_windows_install_folder adapter_version )
         endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
     endif()
 endfunction()
+
+function( install_scripts_to where )
+  if( ${ARGC} GREATER 1 )
+    set( what ${ARGN} )
+    install(
+    FILES
+        ${what}
+    DESTINATION ${where}
+    PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE
+    COMPONENT source
+    EXCLUDE_FROM_ALL
+    )
+  endif()
+endfunction()
