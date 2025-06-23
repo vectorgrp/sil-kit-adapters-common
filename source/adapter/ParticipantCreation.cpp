@@ -26,7 +26,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
 
     std::string participantName;
     std::string defaultParticipantName;
-    defaultParticipantName = (participantNameInputOutput
+    defaultParticipantName = ((participantNameInputOutput && !participantNameInputOutput->empty())
                                   ? *participantNameInputOutput
                                   : ::defaultParticipantName);
     /* else, let's use the content of the given participantNameInputOutput as default:*/
