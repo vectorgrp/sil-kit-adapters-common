@@ -1,13 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "adapter/ParticipantCreation.hpp"
+#include "ParticipantCreation.hpp"
 
 #include <iostream>
 #include <chrono>
 
 #include "asio/io_context.hpp"
 
-#include "util/Parsing.hpp"
+#include "Parsing.hpp"
 
 using namespace std::chrono_literals;
 

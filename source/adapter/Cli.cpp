@@ -1,10 +1,10 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "adapter/Cli.hpp"
+#include "Cli.hpp"
 
 #include <future>
 #include <iostream>
 
-#include "adapter/SignalHandler.hpp"
+#include "SignalHandler.hpp"
 
 void adapters::promptForExit()
 {

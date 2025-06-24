@@ -6,8 +6,8 @@
 #include "silkit/config/all.hpp"
 #include "silkit/services/pubsub/all.hpp"
 #include "silkit/util/serdes/Serialization.hpp"
-#include "util/Parsing.hpp"
-#include "adapter/Cli.hpp"
+#include "common/Parsing.hpp"
+#include "common/Cli.hpp"
 
 using namespace adapters;
 using namespace util;

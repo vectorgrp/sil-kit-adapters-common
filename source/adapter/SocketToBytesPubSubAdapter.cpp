@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "adapter/SocketToBytesPubSubAdapter.hpp"
+#include "SocketToBytesPubSubAdapter.hpp"
 
 #include <type_traits>
 
@@ -8,9 +8,9 @@
 #include "silkit/services/logging/all.hpp"
 #include "silkit/util/serdes/Serialization.hpp"
 
-#include "adapter/Exceptions.hpp"
-#include "util/Parsing.hpp"
-#include "util/StringUtils.hpp"
+#include "Exceptions.hpp"
+#include "Parsing.hpp"
+#include "StringUtils.hpp"
 
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
