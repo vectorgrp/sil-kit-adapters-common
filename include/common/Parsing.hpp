@@ -1,11 +1,12 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
 #pragma once
 
 #include <string>
 #include <cstring>
 #include <algorithm>
-#include "adapter/Exceptions.hpp"
+#include "Exceptions.hpp"
 
 namespace util {
     namespace detail

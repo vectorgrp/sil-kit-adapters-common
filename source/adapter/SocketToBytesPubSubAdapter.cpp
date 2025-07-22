@@ -1,6 +1,7 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
-#include "adapter/SocketToBytesPubSubAdapter.hpp"
+#include "SocketToBytesPubSubAdapter.hpp"
 
 #include <type_traits>
 
@@ -8,9 +9,9 @@
 #include "silkit/services/logging/all.hpp"
 #include "silkit/util/serdes/Serialization.hpp"
 
-#include "adapter/Exceptions.hpp"
-#include "util/Parsing.hpp"
-#include "util/StringUtils.hpp"
+#include "Exceptions.hpp"
+#include "Parsing.hpp"
+#include "StringUtils.hpp"
 
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
@@ -49,7 +50,7 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
             assert(array_length_size == serializer_buffer_out.size());
 
             _publisher->Publish(
-                SilKit::Util::Span(_data_buffer_toPublisher.data(), 
+                SilKit::Util::Span<uint8_t>(_data_buffer_toPublisher.data(),
                     bytes_received + array_length_size));
 
             DoReceiveFrameFromSocket<debug_activated>();

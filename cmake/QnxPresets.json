@@ -1,0 +1,64 @@
+﻿{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "cross-qnx-x86_64",
+            "displayName": "QNX cross-build x86_64",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_CXX_STANDARD": "14"
+            },
+            "environment": {
+                "QNX_BUILD": "true"
+            },
+            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-x86_64.cmake",
+            "binaryDir": "${sourceDir}/_build/${presetName}",
+            "vendor": {
+                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+                "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
+                "rsyncCommandArgs": [ "--exclude", "_build" ]
+                }
+            }
+        },
+        {
+            "inherits": "cross-qnx-x86_64",
+            "name": "cross-qnx-armv7",
+            "displayName": "QNX cross-build armv7",
+            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-armv7.cmake"
+        },
+        {
+            "inherits": "cross-qnx-x86_64",
+            "name": "cross-qnx-aarch64",
+            "displayName": "QNX cross-build aarch64",
+            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-aarch64.cmake"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "cross-qnx-x86_64",
+            "configurePreset": "cross-qnx-x86_64"
+        },
+        {
+            "name": "cross-qnx-armv7",
+            "configurePreset": "cross-qnx-armv7"
+        },
+        {
+            "name": "cross-qnx-aarch64",
+            "configurePreset": "cross-qnx-aarch64"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "cross-qnx-x86_64",
+            "configurePreset": "cross-qnx-x86_64"
+        },
+        {
+            "name": "cross-qnx-armv7",
+            "configurePreset": "cross-qnx-armv7"
+        },
+        {
+            "name": "cross-qnx-aarch64",
+            "configurePreset": "cross-qnx-aarch64"
+        }
+    ]
+}

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+# SPDX-License-Identifier: MIT
+
 ################################################################################
 # Distribution of the source code and binaries
 ################################################################################
@@ -5,9 +8,9 @@
 # Copy all files from the source and bin directory to the proper destination
 # Leave out git repo related data
 
-include( GNUInstallDirs )
+include(GNUInstallDirs)
 
-function( install_git_source git_directory )
+function(install_git_source git_directory)
     install(
         DIRECTORY
             ${git_directory}
@@ -21,7 +24,7 @@ function( install_git_source git_directory )
     )
 endfunction()
 
-function( install_adapter_source adapter_directory )
+function(install_adapter_source adapter_directory)
     install(
         DIRECTORY
             ${adapter_directory}
@@ -33,7 +36,7 @@ function( install_adapter_source adapter_directory )
     )
 endfunction()
 
-function( install_root_source_files )
+function(install_root_source_files)
     install(
         FILES
             CMakeLists.txt
@@ -48,7 +51,7 @@ function( install_root_source_files )
     )
 endfunction()
 
-function( install_lib_linux lib_file )
+function(install_lib_linux lib_file)
     install(
         FILES
             ${lib_file}
@@ -62,7 +65,7 @@ function( install_lib_linux lib_file )
     )
 endfunction()
 
-function( install_lib_windows lib_file )
+function(install_lib_windows lib_file)
     install(
         FILES
             ${lib_file}
@@ -70,8 +73,8 @@ function( install_lib_windows lib_file )
         COMPONENT lib
         EXCLUDE_FROM_ALL
     )
-    get_filename_component( LIB_DIR  "${lib_file}" DIRECTORY )
-    get_filename_component( LIB_NAME "${lib_file}" NAME_WE )
+    get_filename_component(LIB_DIR  "${lib_file}" DIRECTORY)
+    get_filename_component(LIB_NAME "${lib_file}" NAME_WE)
     install(
         FILES
             ${LIB_DIR}/../lib/${LIB_NAME}.lib
@@ -81,15 +84,26 @@ function( install_lib_windows lib_file )
     )
 endfunction()
 
-function( install_silkit_lib output_dir library_dir )
+function(install_silkit_lib output_dir library_dir)
     if(WIN32)
-        install_lib_windows( ${output_dir}/SilKit.dll )
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(SILKIT_DLL_NAME "SilKit.dll")
+        else() # Debug or RelWithDebInfo
+            set(SILKIT_DLL_NAME "SilKitd.dll")
+        endif()
+        install_lib_windows(${output_dir}/${SILKIT_DLL_NAME})    # Set SIL Kit lib name
     else()
-        install_lib_linux( ${library_dir}/libSilKit.so )
+        # Set SIL Kit lib name
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(SILKIT_SO_NAME "libSilKit.so")
+        else() # Debug or RelWithDebInfo
+            set(SILKIT_SO_NAME "libSilKitd.so")
+        endif()
+        install_lib_linux(${library_dir}/${SILKIT_SO_NAME})
     endif()
 endfunction()
 
-function( install_demo demo_executable_name )
+function(install_demo demo_executable_name)
     install(
         TARGETS 
             ${demo_executable_name}
@@ -102,7 +116,7 @@ function( install_demo demo_executable_name )
     )
 endfunction()
 
-function( install_adapter adapter_executable_name )
+function(install_adapter adapter_executable_name)
     install(
         TARGETS
             ${adapter_executable_name}
@@ -116,15 +130,32 @@ function( install_adapter adapter_executable_name )
     )
 endfunction()
 
-function( fix_windows_install_folder adapter_version )
-    if( WIN32 )
-        if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+function(fix_windows_install_folder adapter_version)
+    if(WIN32)
+        if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
             # set the default install paths for Windows 32 and 64 bits
-            if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-                set( CMAKE_INSTALL_PREFIX "C:/Program Files/Vector SIL Kit Adapter Bytestream Socket ${adapter_version}" CACHE PATH "Default install path" FORCE )
-            elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-                set( CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Vector SIL Kit Adapter Bytestream Socket ${adapter_version}" CACHE PATH "Default install path" FORCE )
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(CMAKE_INSTALL_PREFIX "C:/Program Files/Vector SIL Kit Adapter Bytestream Socket ${adapter_version}" CACHE PATH "Default install path" FORCE)
+            elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+                set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Vector SIL Kit Adapter Bytestream Socket ${adapter_version}" CACHE PATH "Default install path" FORCE)
             endif()
-        endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+        endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     endif()
+endfunction()
+
+function(install_scripts_to where)
+  if(${ARGC} GREATER 1)
+    set(what ${ARGN})
+    install(
+        FILES
+            ${what}
+        DESTINATION ${where}
+        PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE
+        COMPONENT source
+        EXCLUDE_FROM_ALL
+    )
+  endif()
 endfunction()

@@ -9,7 +9,7 @@
             "binaryDir": "${sourceDir}/build/${presetName}",
             "installDir": "${sourceDir}/install/${presetName}",
             "cacheVariables": {
-                "SILKIT_VERSION": "4.0.50"
+                "SILKIT_VERSION": "4.0.56"
             }
         }
     ]

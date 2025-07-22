@@ -1,3 +1,5 @@
+Reminder: check the sik-kit-adapters-qemu repo is still working with this branch when testing this PR.
+
 ## Developer checklist (address before review)
 
 - [ ] Documentation updated (public API changes only)

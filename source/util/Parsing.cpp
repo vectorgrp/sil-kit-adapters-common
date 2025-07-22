@@ -1,6 +1,7 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
-#include "util/Parsing.hpp"
+#include "Parsing.hpp"
 #include <iostream>
 #include <algorithm>
 #include <array>

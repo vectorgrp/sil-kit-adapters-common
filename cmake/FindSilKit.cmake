@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+# SPDX-License-Identifier: MIT
+
 # SIL KIT PACKAGE CONSUMPTION
 
 ## On Windows, if an msi-installed version of SIL Kit is available and you want to build the adapters against it, CMAKE will attempt to use it.
@@ -11,57 +14,58 @@
 # Required minimal SIL Kit version during lookup.
 set(SILKIT_REQUIRED_MIN_VERSION "4.0.40")
 
-set(SILKIT_DEFAULT_DOWNLOAD_VERSION "4.0.50" CACHE STRING "If no SIL Kit package is specified with SILKIT_VERSION, this package version will be downloaded")
+set(SILKIT_DEFAULT_DOWNLOAD_VERSION "4.0.56" CACHE STRING "If no SIL Kit package is specified with SILKIT_VERSION, this package version will be downloaded")
 set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN "ubuntu-18.04-x86_64-gcc" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on non-windows system.")
 set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN "Win-x86_64-VS2017" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on Windows systems.")
 
 if((NOT DEFINED SILKIT_MIN_VERSION) OR (SILKIT_MIN_VERSION VERSION_LESS ${SILKIT_REQUIRED_MIN_VERSION}))
-  set(SILKIT_MIN_VERSION ${SILKIT_REQUIRED_MIN_VERSION} CACHE STRING "Overrideable min version of SilKit for search (must be > SILKIT_REQUIRED_MIN_VERSION (${SILKIT_REQUIRED_MIN_VERSION}))" FORCE)
+    set(SILKIT_MIN_VERSION ${SILKIT_REQUIRED_MIN_VERSION} CACHE STRING "Overrideable min version of SilKit for search (must be > SILKIT_REQUIRED_MIN_VERSION (${SILKIT_REQUIRED_MIN_VERSION}))" FORCE)
 endif()
 
 if((NOT DEFINED SILKIT_VERSION) OR (SILKIT_VERSION VERSION_LESS ${SILKIT_MIN_VERSION}))
-  set(SILKIT_VERSION ${SILKIT_DEFAULT_DOWNLOAD_VERSION} CACHE STRING "Overrideable version of SilKit for search (must be > SILKIT_MIN_VERSION (${SILKIT_MIN_VERSION}))" FORCE)
+    set(SILKIT_VERSION ${SILKIT_DEFAULT_DOWNLOAD_VERSION} CACHE STRING "Overrideable version of SilKit for search (must be > SILKIT_MIN_VERSION (${SILKIT_MIN_VERSION}))" FORCE)
 endif()
 
 if((NOT DEFINED SILKIT_FLAVOR))
-  if (WIN32)
-    set(SILKIT_FLAVOR_D "${SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN}")
-  else()
-    set(SILKIT_FLAVOR_D "${SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN}")
-  endif()
-  set(SILKIT_FLAVOR "${SILKIT_FLAVOR_D}" CACHE STRING "Overrideable flavor of SilKit for download." FORCE)
+    if (WIN32)
+        set(SILKIT_FLAVOR_D "${SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN}")
+    else()
+        set(SILKIT_FLAVOR_D "${SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN}")
+    endif()
+    set(SILKIT_FLAVOR "${SILKIT_FLAVOR_D}" CACHE STRING "Overrideable flavor of SilKit for download." FORCE)
 endif()
 
 if(DEFINED SILKIT_PACKAGE_DIR)
-  # if the user forces using a specific SIL Kit package, use it
-  message(STATUS "SILKIT_PACKAGE_DIR has been set to: ${SILKIT_PACKAGE_DIR}, CMAKE will look for a SIL Kit package in that directory")
-  find_package(SilKit ${SILKIT_VERSION}
-    REQUIRED
-    CONFIG
-    NO_CMAKE_PACKAGE_REGISTRY
-    NO_DEFAULT_PATH
-    PATHS "${SILKIT_PACKAGE_DIR}")
-else()
-  if (WIN32)
-    # otherwise, look for an installed version of SIL Kit (.msi file) 
-    message(STATUS "SILKIT_PACKAGE_DIR has not been set by user. Attempting to find an msi-installed version of SIL Kit")
+    # if the user forces using a specific SIL Kit package, use it
+    message(STATUS "SILKIT_PACKAGE_DIR has been set to: ${SILKIT_PACKAGE_DIR}, CMAKE will look for a SIL Kit package in that directory")
     find_package(SilKit ${SILKIT_VERSION}
-      CONFIG)
-  endif()
+        REQUIRED
+        CONFIG
+        NO_CMAKE_PACKAGE_REGISTRY
+        NO_DEFAULT_PATH
+        PATHS "${SILKIT_PACKAGE_DIR}"
+    )
+else()
+    if (WIN32)
+        # otherwise, look for an installed version of SIL Kit (.msi file)
+        message(STATUS "SILKIT_PACKAGE_DIR has not been set by user. Attempting to find an msi-installed version of SIL Kit")
+        find_package(SilKit ${SILKIT_VERSION}
+        CONFIG)
+    endif()
 
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
-    set(FetchContent_Declare_TIMESTAMPS DOWNLOAD_EXTRACT_TIMESTAMP true)
-  endif()
+    if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
+        set(FetchContent_Declare_TIMESTAMPS DOWNLOAD_EXTRACT_TIMESTAMP true)
+    endif()
   
-  if(NOT SilKit_FOUND)
-    message(STATUS "No version of SIL Kit present. Attempting to fetch [SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}] from github.com")
-    include(FetchContent)
-    FetchContent_Declare(
-      silkit
-      ${FetchContent_Declare_TIMESTAMPS}
-      URL https://github.com/vectorgrp/sil-kit/releases/download/sil-kit%2Fv${SILKIT_VERSION}/SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}.zip
-      DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}/Downloads
-      )
+    if(NOT SilKit_FOUND)
+        message(STATUS "No version of SIL Kit present. Attempting to fetch [SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}] from github.com")
+        include(FetchContent)
+        FetchContent_Declare(
+            silkit
+            ${FetchContent_Declare_TIMESTAMPS}
+            URL https://github.com/vectorgrp/sil-kit/releases/download/v${SILKIT_VERSION}/SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}.zip
+            DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}/Downloads
+        )
 
     message(STATUS "SIL Kit: fetching [SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}]")
     FetchContent_MakeAvailable(silkit)
@@ -72,17 +76,17 @@ else()
 
     message(STATUS "Searching SilKit package which has been fetched from github.com")
     find_package(SilKit ${SILKIT_VERSION}
-      REQUIRED
-      CONFIG
-      NO_CMAKE_PACKAGE_REGISTRY
-      NO_DEFAULT_PATH
-      PATHS "${silkit_SOURCE_DIR}"
+        REQUIRED
+        CONFIG
+        NO_CMAKE_PACKAGE_REGISTRY
+        NO_DEFAULT_PATH
+        PATHS "${silkit_SOURCE_DIR}"
     )
   endif()  
 endif()
 
 if(TARGET SilKit::SilKit)
-  message(STATUS "SIL Kit package has been successfully imported as a CMake target. [version : ${SilKit_VERSION}]")
+    message(STATUS "SIL Kit package has been successfully imported as a CMake target. [version : ${SilKit_VERSION}]")
 else()
-  message(FATAL_ERROR "Something went wrong : Could not find SIL Kit package.")
+    message(FATAL_ERROR "Something went wrong : Could not find SIL Kit package.")
 endif()

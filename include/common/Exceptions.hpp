@@ -1,4 +1,5 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
 #pragma once
 
@@ -65,6 +66,9 @@ void throwIf(bool b)
         throw exception();
 }
 
-inline auto& throwInvalidCliIf = throwIf<InvalidCli>;
+inline void throwInvalidCliIf(bool b)
+{
+    return throwIf<InvalidCli>(b);
+}
 
 } // namespace adapters

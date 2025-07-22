@@ -1,10 +1,12 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "adapter/Cli.hpp"
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
+
+#include "Cli.hpp"
 
 #include <future>
 #include <iostream>
 
-#include "adapter/SignalHandler.hpp"
+#include "SignalHandler.hpp"
 
 void adapters::promptForExit()
 {

@@ -1,10 +1,7 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
 #include "PubSubEchoDevice.hpp"
-/**************************************************************************************************
- * Main Function
- **************************************************************************************************/
-
 
 int main(int argc, char** argv)
 {    

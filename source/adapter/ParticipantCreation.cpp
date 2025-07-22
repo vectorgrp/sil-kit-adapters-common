@@ -1,13 +1,14 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
+// SPDX-License-Identifier: MIT
 
-#include "adapter/ParticipantCreation.hpp"
+#include "ParticipantCreation.hpp"
 
 #include <iostream>
 #include <chrono>
 
 #include "asio/io_context.hpp"
 
-#include "util/Parsing.hpp"
+#include "Parsing.hpp"
 
 using namespace std::chrono_literals;
 
@@ -26,7 +27,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
 
     std::string participantName;
     std::string defaultParticipantName;
-    defaultParticipantName = (participantNameInputOutput
+    defaultParticipantName = ((participantNameInputOutput && !participantNameInputOutput->empty())
                                   ? *participantNameInputOutput
                                   : ::defaultParticipantName);
     /* else, let's use the content of the given participantNameInputOutput as default:*/
