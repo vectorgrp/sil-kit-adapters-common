@@ -1,0 +1,12 @@
+name: test the super projects
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  test-qemu-adapter:
+    uses: ${{ secrets.QEMU_ADAPTER_WORKFLOW }}
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
