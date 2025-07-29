@@ -18,14 +18,6 @@ set(SILKIT_DEFAULT_DOWNLOAD_VERSION "4.0.56" CACHE STRING "If no SIL Kit package
 set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN "ubuntu-18.04-x86_64-gcc" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on non-windows system.")
 set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN "Win-x86_64-VS2017" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on Windows systems.")
 
-if((NOT DEFINED SILKIT_MIN_VERSION) OR (SILKIT_MIN_VERSION VERSION_LESS ${SILKIT_REQUIRED_MIN_VERSION}))
-    set(SILKIT_MIN_VERSION ${SILKIT_REQUIRED_MIN_VERSION} CACHE STRING "Overrideable min version of SilKit for search (must be > SILKIT_REQUIRED_MIN_VERSION (${SILKIT_REQUIRED_MIN_VERSION}))" FORCE)
-endif()
-
-if((NOT DEFINED SILKIT_VERSION) OR (SILKIT_VERSION VERSION_LESS ${SILKIT_MIN_VERSION}))
-    set(SILKIT_VERSION ${SILKIT_DEFAULT_DOWNLOAD_VERSION} CACHE STRING "Overrideable version of SilKit for search (must be > SILKIT_MIN_VERSION (${SILKIT_MIN_VERSION}))" FORCE)
-endif()
-
 if((NOT DEFINED SILKIT_FLAVOR))
     if (WIN32)
         set(SILKIT_FLAVOR_D "${SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN}")
@@ -38,7 +30,7 @@ endif()
 if(DEFINED SILKIT_PACKAGE_DIR)
     # if the user forces using a specific SIL Kit package, use it
     message(STATUS "SILKIT_PACKAGE_DIR has been set to: ${SILKIT_PACKAGE_DIR}, CMAKE will look for a SIL Kit package in that directory")
-    find_package(SilKit ${SILKIT_VERSION}
+    find_package(SilKit ${SILKIT_REQUIRED_MIN_VERSION}
         REQUIRED
         CONFIG
         NO_CMAKE_PACKAGE_REGISTRY
@@ -49,7 +41,7 @@ else()
     if (WIN32)
         # otherwise, look for an installed version of SIL Kit (.msi file)
         message(STATUS "SILKIT_PACKAGE_DIR has not been set by user. Attempting to find an msi-installed version of SIL Kit")
-        find_package(SilKit ${SILKIT_VERSION}
+        find_package(SilKit ${SILKIT_REQUIRED_MIN_VERSION}
         CONFIG)
     endif()
 
@@ -58,16 +50,16 @@ else()
     endif()
   
     if(NOT SilKit_FOUND)
-        message(STATUS "No version of SIL Kit present. Attempting to fetch [SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}] from github.com")
+        message(STATUS "No version of SIL Kit present. Attempting to fetch [SilKit-${SILKIT_DEFAULT_DOWNLOAD_VERSION}-${SILKIT_FLAVOR}] from github.com")
         include(FetchContent)
         FetchContent_Declare(
             silkit
             ${FetchContent_Declare_TIMESTAMPS}
-            URL https://github.com/vectorgrp/sil-kit/releases/download/v${SILKIT_VERSION}/SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}.zip
+            URL https://github.com/vectorgrp/sil-kit/releases/download/v${SILKIT_DEFAULT_DOWNLOAD_VERSION}/SilKit-${SILKIT_DEFAULT_DOWNLOAD_VERSION}-${SILKIT_FLAVOR}.zip
             DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}/Downloads
         )
 
-    message(STATUS "SIL Kit: fetching [SilKit-${SILKIT_VERSION}-${SILKIT_FLAVOR}]")
+    message(STATUS "SIL Kit: fetching [SilKit-${SILKIT_DEFAULT_DOWNLOAD_VERSION}-${SILKIT_FLAVOR}]")
     FetchContent_MakeAvailable(silkit)
 
     set(SILKIT_SOURCE_DIR ${silkit_SOURCE_DIR}/SilKit-Source)
@@ -75,7 +67,7 @@ else()
     message(STATUS "SIL Kit: using pre-built binaries from: ${silkit_SOURCE_DIR}")
 
     message(STATUS "Searching SilKit package which has been fetched from github.com")
-    find_package(SilKit ${SILKIT_VERSION}
+    find_package(SilKit ${SILKIT_REQUIRED_MIN_VERSION}
         REQUIRED
         CONFIG
         NO_CMAKE_PACKAGE_REGISTRY
@@ -85,8 +77,6 @@ else()
   endif()  
 endif()
 
-if(TARGET SilKit::SilKit)
-    message(STATUS "SIL Kit package has been successfully imported as a CMake target. [version : ${SilKit_VERSION}]")
-else()
+if(NOT TARGET SilKit::SilKit)
     message(FATAL_ERROR "Something went wrong : Could not find SIL Kit package.")
 endif()

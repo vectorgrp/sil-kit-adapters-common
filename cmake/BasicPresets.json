@@ -7,10 +7,7 @@
             "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "installDir": "${sourceDir}/install/${presetName}",
-            "cacheVariables": {
-                "SILKIT_VERSION": "4.0.56"
-            }
+            "installDir": "${sourceDir}/install/${presetName}"
         }
     ]
 }
