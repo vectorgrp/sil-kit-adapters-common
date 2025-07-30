@@ -6,7 +6,7 @@ on:
 
 jobs:
   test-qemu-adapter:
-    uses: ${{ secrets.QEMU_ADAPTER_WORKFLOW }}
+    uses: pnd/sil-kit-adapters-qemu/.github/workflows/trigger-adapters-ci.yaml@main
     with:
       common_repo_commit: ${{ github.event.pull_request.head.sha }}
     secrets: inherit

@@ -3,6 +3,6 @@
   "include": [
     "cmake/LinuxPresets.json",
     "cmake/WindowsPresets.json",
-    "cmake/QNXPresets.json"
+    "cmake/QnxPresets.json"
   ]
 }

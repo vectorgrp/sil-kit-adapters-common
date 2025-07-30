@@ -1,5 +1,6 @@
 ﻿{
     "version": 4,
+    "include": [ "BasicPresets.json" ],
     "configurePresets": [
         {
             "name": "cross-qnx-x86_64",
@@ -9,7 +10,8 @@
                 "CMAKE_CXX_STANDARD": "14"
             },
             "environment": {
-                "QNX_BUILD": "true"
+                "QNX_BUILD": "true",
+                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
             },
             "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-x86_64.cmake",
             "binaryDir": "${sourceDir}/_build/${presetName}",
