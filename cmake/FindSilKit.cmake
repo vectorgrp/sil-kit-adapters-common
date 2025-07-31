@@ -14,8 +14,8 @@
 # Required minimal SIL Kit version during lookup.
 set(SILKIT_REQUIRED_MIN_VERSION "4.0.40")
 
-set(SILKIT_DEFAULT_DOWNLOAD_VERSION "4.0.56" CACHE STRING "If no SIL Kit package is specified with SILKIT_VERSION, this package version will be downloaded")
-set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN "ubuntu-18.04-x86_64-gcc" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on non-windows system.")
+set(SILKIT_DEFAULT_DOWNLOAD_VERSION "5.0.0" CACHE STRING "If no SIL Kit package is specified with SILKIT_VERSION, this package version will be downloaded")
+set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_NONWIN "ubuntu-20.04-x86_64-gcc" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on non-windows system.")
 set(SILKIT_DEFAULT_DOWNLOAD_FLAVOR_WIN "Win-x86_64-VS2017" CACHE STRING "If no SIL Kit package is specified, this package flavor will be downloaded on Windows systems.")
 
 if((NOT DEFINED SILKIT_FLAVOR))
