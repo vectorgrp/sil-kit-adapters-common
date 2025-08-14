@@ -1,45 +1,55 @@
 # SPDX-FileCopyrightText: Copyright 2025 Vector Informatik GmbH
 # SPDX-License-Identifier: MIT
-
 function(copy_sil_kit_to_bin target_name output_directory library_directory)
-    get_target_property(SILKIT_DIR_LIB SilKit::SilKit LOCATION) # Get the SilKit.dll full path
-    get_filename_component(SILKIT_DIR_LIB ${SILKIT_DIR_LIB} DIRECTORY) # Get the SilKit.dll directory path
-
+    get_target_property(SILKIT_DLL_DIR SilKit::SilKit LOCATION)
+    get_filename_component(SILKIT_DLL_DIR ${SILKIT_DLL_DIR} DIRECTORY)
+    get_filename_component(SILKIT_LIB_DIR "${SILKIT_DLL_DIR}/../lib" REALPATH)
+    
     if(WIN32)
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(SILKIT_DLL_NAME "SilKit.dll")
-            set(SILKIT_LIB_NAME "SilKit.lib")
-        else() # Debug or RelWithDebInfo
-            set(SILKIT_DLL_NAME "SilKitd.dll")
-            set(SILKIT_LIB_NAME "SilKitd.lib")
-        endif()
-        # Copy the SilKit.dll next to the executables
-        add_custom_command(
-            TARGET ${target_name}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND}
-            ARGS -E copy ${SILKIT_DIR_LIB}/${SILKIT_DLL_NAME} ${output_directory}/${SILKIT_DLL_NAME}
+        # Collect all .dll, .lib, .pdb from bin and lib
+        file(GLOB WIN_BIN_FILES
+            "${SILKIT_DLL_DIR}/*.dll"
+            "${SILKIT_LIB_DIR}/*.dll"
         )
-        # Copy the SilKit(d).lib in the lib folder
-        add_custom_command(
-            TARGET ${target_name}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND}
-            ARGS -E copy ${SILKIT_DIR_LIB}/../lib/${SILKIT_LIB_NAME} ${library_directory}/${SILKIT_LIB_NAME}
+        file(GLOB WIN_LIB_FILES
+            "${SILKIT_LIB_DIR}/*.lib"
+            "${SILKIT_LIB_DIR}/*.pdb"
         )
+
+        # Copy all bin files to output_directory
+        foreach(f ${WIN_BIN_FILES})
+            get_filename_component(fname "${f}" NAME)
+            add_custom_command(
+                TARGET ${target_name}
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND}
+                ARGS -E copy "${f}" "${output_directory}/${fname}"
+            )
+        endforeach()
+
+        # Copy all lib files to library_directory
+        foreach(f ${WIN_LIB_FILES})
+            get_filename_component(fname "${f}" NAME)
+            add_custom_command(
+                TARGET ${target_name}
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy "${f}" "${library_directory}/${fname}"
+            )
+        endforeach()
     else()
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(SILKIT_SO_NAME "libSilKit.so")
-        else() # Debug or RelWithDebInfo
-            set(SILKIT_SO_NAME "libSilKitd.so")
-        endif()
-        # Copy the libSilKit.so in the lib folder
-        add_custom_command(
-            TARGET ${target_name}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND}
-            ARGS -E copy ${SILKIT_DIR_LIB}/${SILKIT_SO_NAME} ${library_directory}/${SILKIT_SO_NAME}
+        # Collect all .so and .debug files from lib
+        file(GLOB LINUX_LIB_FILES
+            "${SILKIT_LIB_DIR}/*.so"
+            "${SILKIT_LIB_DIR}/*.debug"
         )
+        foreach(f ${LINUX_LIB_FILES})
+            get_filename_component(fname "${f}" NAME)
+            add_custom_command(
+                TARGET ${target_name}
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy "${f}" "${library_directory}/${fname}"
+            )
+        endforeach()
     endif()
 endfunction()
 

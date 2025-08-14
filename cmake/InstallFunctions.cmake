@@ -65,6 +65,16 @@ function(install_lib_linux lib_file)
     )
 endfunction()
 
+function(install_lib_debug debug)
+    install(
+        FILES
+            ${debug}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT debug
+        EXCLUDE_FROM_ALL
+    )
+endfunction()
+
 function(install_lib_windows lib_file)
     install(
         FILES
@@ -85,21 +95,35 @@ function(install_lib_windows lib_file)
 endfunction()
 
 function(install_silkit_lib output_dir library_dir)
+    
+    get_target_property(SILKIT_DLL_DIR SilKit::SilKit LOCATION)
+    get_filename_component(SILKIT_DLL_DIR ${SILKIT_DLL_DIR} DIRECTORY)
+    get_filename_component(SILKIT_LIB_DIR "${SILKIT_DLL_DIR}/../lib" REALPATH)
+
     if(WIN32)
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(SILKIT_DLL_NAME "SilKit.dll")
-        else() # Debug or RelWithDebInfo
-            set(SILKIT_DLL_NAME "SilKitd.dll")
-        endif()
-        install_lib_windows(${output_dir}/${SILKIT_DLL_NAME})    # Set SIL Kit lib name
+        # Collect all .dll files from both DLL and LIB directories
+        file(GLOB SILKIT_DLLS "${SILKIT_DLL_DIR}/*.dll")
+        foreach(dll ${SILKIT_DLLS})
+            install_lib_windows(${dll})
+        endforeach()
+
+        # Collect and install .pdb files manually
+        file(GLOB SILKIT_PDBS "${SILKIT_LIB_DIR}/*.pdb")
+        foreach(pdb ${SILKIT_PDBS})
+            install_lib_debug(${pdb})
+        endforeach()
+
     else()
-        # Set SIL Kit lib name
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(SILKIT_SO_NAME "libSilKit.so")
-        else() # Debug or RelWithDebInfo
-            set(SILKIT_SO_NAME "libSilKitd.so")
-        endif()
-        install_lib_linux(${library_dir}/${SILKIT_SO_NAME})
+        # Collect and install .so and .debug files
+        file(GLOB SILKIT_SOS "${SILKIT_LIB_DIR}/*.so")
+        foreach(so ${SILKIT_SOS})
+            install_lib_linux(${so})
+        endforeach()
+    
+        file(GLOB SILKIT_DEBUGS "${SILKIT_LIB_DIR}/*.debug")
+        foreach(debug ${SILKIT_DEBUGS})
+            install_lib_debug(${debug})
+        endforeach()
     endif()
 endfunction()
 
