@@ -8,7 +8,7 @@
             "inherits": "base",
             "hidden": true,
             "cacheVariables": {
-                "SILKIT_FLAVOR": "Win-x86_64-VS2017"
+                "SILKIT_FLAVOR": "Win-x86_64-VS2019"
             },
             "condition": {
                 "type": "equals",
