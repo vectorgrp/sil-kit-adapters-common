@@ -65,8 +65,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
         participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString);
     }
 
-    std::cout << "Creating participant '" << *participantNameInputOutput << "' at " << registryURI << std::endl;
-    result = SilKit::CreateParticipant(participantConfiguration, *participantNameInputOutput, registryURI);
+    result = SilKit::CreateParticipant(participantConfiguration, participantName, registryURI);
 
     logger = result->GetLogger();
 
@@ -82,8 +81,8 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
 
         systemMonitor->AddParticipantStatusHandler(
             [runningStatePromise,
-             participantNameInputOutput](const SilKit::Services::Orchestration::ParticipantStatus& status) {
-            if (*participantNameInputOutput == status.participantName)
+             participantName](const SilKit::Services::Orchestration::ParticipantStatus& status) {
+            if (participantName == status.participantName)
             {
                 if (status.state == SilKit::Services::Orchestration::ParticipantState::Running)
                 {
