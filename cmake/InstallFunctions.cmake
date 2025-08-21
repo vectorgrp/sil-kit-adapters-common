@@ -24,14 +24,42 @@ function(install_git_source git_directory)
     )
 endfunction()
 
-function(install_adapter_source adapter_directory)
+function(install_adapter_source)
+    set(directory_paths ${ARGV})
     install(
         DIRECTORY
-            ${adapter_directory}
+            ${directory_paths}
 
         DESTINATION .
         COMPONENT source
         EXCLUDE_FROM_ALL
+
+        FILES_MATCHING
+            PATTERN *.cpp
+            PATTERN *.hpp
+            PATTERN *.cmake
+            PATTERN *.ps1
+            PATTERN *.sh
+            PATTERN *.json
+            PATTERN *.yaml
+            PATTERN *.yml
+            PATTERN *.can
+            PATTERN *.dbc
+            PATTERN *.cfg
+            PATTERN *.vcdl
+            PATTERN *.vCODM
+            PATTERN *.xvp
+            PATTERN *.xml
+            PATTERN *.fbbin
+            PATTERN *.md
+            PATTERN *.png
+            PATTERN *.1
+            PATTERN Dockerfile
+            PATTERN LICENSE
+            PATTERN CMakeLists.txt
+
+        REGEX "\.git$" EXCLUDE
+        REGEX "\.github$" EXCLUDE
         REGEX "Downloads$" EXCLUDE
     )
 endfunction()
