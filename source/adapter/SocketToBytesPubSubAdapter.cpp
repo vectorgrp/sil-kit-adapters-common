@@ -18,7 +18,7 @@ using namespace std::chrono_literals;
 using namespace adapters;
 using namespace adapters::bytes_socket;
 
-template<bool debug_activated>
+template <bool debug_activated>
 void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
 {
     static constexpr size_t array_length_size = sizeof(uint32_t);
@@ -26,68 +26,67 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
     _socket.async_read_some(
         // Setting up the buffer given to point after `array_length_size` bytes to prevent reallocation.
         // This skipped part will contain the SIL Kit-serialized array length.
-        asio::buffer(_data_buffer_toPublisher.data() + array_length_size, usable_size ),
+        asio::buffer(_data_buffer_toPublisher.data() + array_length_size, usable_size),
         [this](const std::error_code ec, const std::size_t bytes_received) {
-            if (ec)
-                throw IncompleteReadError{};
+        if (ec)
+            throw IncompleteReadError{};
 
-            // Templating will optimize this (including string building) out for cases when debug
-            //  is not configured.
-            if(debug_activated)
-            {
-                _logger->Debug(
-                    "Adapter >> SIL Kit: "
-                    + string(reinterpret_cast<const char*>(_data_buffer_toPublisher.data()+array_length_size), bytes_received));
-            }
-            
-            _serializer.BeginArray(bytes_received);
-            auto serializer_buffer_out = _serializer.ReleaseBuffer();
-            memcpy(_data_buffer_toPublisher.data(), 
-                serializer_buffer_out.data(), 
-                serializer_buffer_out.size());
+        // Templating will optimize this (including string building) out for cases when debug
+        //  is not configured.
+        if (debug_activated)
+        {
+            _logger->Debug("Adapter >> SIL Kit: "
+                           + string(reinterpret_cast<const char*>(_data_buffer_toPublisher.data() + array_length_size),
+                                    bytes_received));
+        }
 
-            //debug-only test to catch changes in binary implementation of SIL Kit
-            assert(array_length_size == serializer_buffer_out.size());
+        _serializer.BeginArray(bytes_received);
+        auto serializer_buffer_out = _serializer.ReleaseBuffer();
+        memcpy(_data_buffer_toPublisher.data(), serializer_buffer_out.data(), serializer_buffer_out.size());
 
-            _publisher->Publish(
-                SilKit::Util::Span<uint8_t>(_data_buffer_toPublisher.data(),
-                    bytes_received + array_length_size));
+        //debug-only test to catch changes in binary implementation of SIL Kit
+        assert(array_length_size == serializer_buffer_out.size());
 
-            DoReceiveFrameFromSocket<debug_activated>();
-        });
+        _publisher->Publish(
+            SilKit::Util::Span<uint8_t>(_data_buffer_toPublisher.data(), bytes_received + array_length_size));
+
+        DoReceiveFrameFromSocket<debug_activated>();
+    });
 }
 
 SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_context, const string& host,
-                                                           const string& service,
-                                                           const string& publisherName, const string& subscriberName,
-                                                           const PubSubSpec& pubDataSpec, const PubSubSpec& subDataSpec,
-                                                           SilKit::IParticipant* participant)
+                                                       const string& service, const string& publisherName,
+                                                       const string& subscriberName, const PubSubSpec& pubDataSpec,
+                                                       const PubSubSpec& subDataSpec, SilKit::IParticipant* participant)
     : _socket{io_context}
     , _logger{participant->GetLogger()}
     , _publisher{participant->CreateDataPublisher(publisherName, pubDataSpec)}
     , _subscriber{participant->CreateDataSubscriber(
           subscriberName, subDataSpec,
-          _logger->GetLogLevel()<=SilKit::Services::Logging::Level::Debug?
-          DataMessageHandler{[&](IDataSubscriber*, const DataMessageEvent& dataMessageEvent) {
-              _deserializer.Reset(std::move(ToStdVector(dataMessageEvent.data)));
-              this->_data_buffer_fromSubscriber.resize(_deserializer.BeginArray());
-              for (auto& val : _data_buffer_fromSubscriber)
-              {
-                  val = _deserializer.Deserialize<uint8_t>(8);
-              }
-              _logger->Debug("SIL Kit >> Adapter: "
-                             + string((const char*)_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
-              _socket.write_some(asio::buffer(_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
-          }}:
-          DataMessageHandler{[&](IDataSubscriber*, const DataMessageEvent& dataMessageEvent) {
-              _deserializer.Reset(std::move(ToStdVector(dataMessageEvent.data)));
-              this->_data_buffer_fromSubscriber.resize(_deserializer.BeginArray());
-              for (auto& val : _data_buffer_fromSubscriber)
-              {
-                  val = _deserializer.Deserialize<uint8_t>(8);
-              }
-              _socket.write_some(asio::buffer(_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
-          }}) }
+          _logger->GetLogLevel() <= SilKit::Services::Logging::Level::Debug
+              ? DataMessageHandler{[&](IDataSubscriber*, const DataMessageEvent& dataMessageEvent) {
+                    _deserializer.Reset(std::move(ToStdVector(dataMessageEvent.data)));
+                    this->_data_buffer_fromSubscriber.resize(_deserializer.BeginArray());
+                    for (auto& val : _data_buffer_fromSubscriber)
+                    {
+                        val = _deserializer.Deserialize<uint8_t>(8);
+                    }
+                    _logger->Debug(
+                        "SIL Kit >> Adapter: "
+                        + string((const char*)_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
+                    _socket.write_some(
+                        asio::buffer(_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
+                }}
+              : DataMessageHandler{[&](IDataSubscriber*, const DataMessageEvent& dataMessageEvent) {
+                    _deserializer.Reset(std::move(ToStdVector(dataMessageEvent.data)));
+                    this->_data_buffer_fromSubscriber.resize(_deserializer.BeginArray());
+                    for (auto& val : _data_buffer_fromSubscriber)
+                    {
+                        val = _deserializer.Deserialize<uint8_t>(8);
+                    }
+                    _socket.write_some(
+                        asio::buffer(_data_buffer_fromSubscriber.data(), _data_buffer_fromSubscriber.size()));
+                }})}
 {
     try
     {
@@ -97,12 +96,11 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
     {
         std::ostringstream error_message;
         error_message << e.what() << std::endl;
-        error_message << "Error encountered while trying to connect to socket at \"" 
-                      << host << ':' << service << '"';
+        error_message << "Error encountered while trying to connect to socket at \"" << host << ':' << service << '"';
         throw std::runtime_error(error_message.str());
     }
     _logger->Info("Socket connect success");
-    if(_logger->GetLogLevel() <= SilKit::Services::Logging::Level::Debug)
+    if (_logger->GetLogLevel() <= SilKit::Services::Logging::Level::Debug)
     {
         DoReceiveFrameFromSocket<true>();
     }
@@ -121,9 +119,7 @@ using string = std::string;
 /// <param name="topicname">input/output</param>
 /// <param name="defaultname">output</param>
 /// <param name="ns">output</param>
-void extractAndEraseNamespaceAndDefaultnameFrom(string& topicname, 
-                                   string& defaultname,
-                                   string& ns)
+void extractAndEraseNamespaceAndDefaultnameFrom(string& topicname, string& defaultname, string& ns)
 {
     //reject mandatory labels as topic names:
     throwInvalidCliIf(topicname.find_first_of("=") != string::npos);
@@ -151,7 +147,7 @@ void extractAndEraseNamespaceAndDefaultnameFrom(string& topicname,
     }
     else if (splitTopic.size() == 1)
     {
-        return ;
+        return;
     }
     else
     {
@@ -162,26 +158,25 @@ void extractAndEraseNamespaceAndDefaultnameFrom(string& topicname,
 /// <summary>
 /// easier to read version from std::count(s.begin(), s.end(), c);
 /// </summary>
-template<class iterable>
-auto count(const iterable& s, char c)
--> typename std::iterator_traits<typename iterable::const_iterator>::difference_type
+template <class iterable>
+auto count(const iterable& s, char c) ->
+    typename std::iterator_traits<typename iterable::const_iterator>::difference_type
 {
     return std::count(s.begin(), s.end(), c);
 };
 
 void extractTopicLabels(const std::vector<string>& args, std::vector<string>::iterator& arg_iter,
-                    SilKit::Services::PubSub::PubSubSpec& dataSpec)
+                        SilKit::Services::PubSub::PubSubSpec& dataSpec)
 {
     for (; arg_iter != args.end() && (count(*arg_iter, ':') == 1 || count(*arg_iter, '=') == 1); ++arg_iter)
     {
         auto labelKeyValue = util::split(*arg_iter, ":=");
-        dataSpec.AddLabel(
-            labelKeyValue[0], labelKeyValue[1], [&]() -> auto{
-                if ((*arg_iter)[labelKeyValue[0].size()] == '=')
-                    return SilKit::Services::MatchingLabel::Kind::Mandatory;
-                else
-                    return SilKit::Services::MatchingLabel::Kind::Optional;
-            }());
+        dataSpec.AddLabel(labelKeyValue[0], labelKeyValue[1], [&]() -> auto {
+            if ((*arg_iter)[labelKeyValue[0].size()] == '=')
+                return SilKit::Services::MatchingLabel::Kind::Mandatory;
+            else
+                return SilKit::Services::MatchingLabel::Kind::Optional;
+        }());
     }
 };
 
@@ -201,21 +196,17 @@ string generatePublisherNameFrom(const string& participantName)
 
 string SocketToBytesPubSubAdapter::printArgumentHelp(const string& prefix)
 {
-    return prefix + " <host>:<port>,\n" +
-        prefix + "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n" +
-        prefix + "   [[,<label key>:<optional label value>\n" +
-        prefix + "    |,<label key>=<mandatory label value>\n" +
-        prefix + "   ]],\n" +
-        prefix + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n" +
-        prefix + "   [[,<label key>:<optional label value>\n" +
-        prefix + "    |,<label key>=<mandatory label value>\n" +
-        prefix + "   ]]\n";
+    return prefix + " <host>:<port>,\n" + prefix + "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n"
+           + prefix + "   [[,<label key>:<optional label value>\n" + prefix
+           + "    |,<label key>=<mandatory label value>\n" + prefix + "   ]],\n" + prefix
+           + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n" + prefix
+           + "   [[,<label key>:<optional label value>\n" + prefix + "    |,<label key>=<mandatory label value>\n"
+           + prefix + "   ]]\n";
 }
 
 SocketToBytesPubSubAdapter* SocketToBytesPubSubAdapter::parseArgument(
-    char* chardevSocketTransmitterArg, std::set<string>& alreadyProvidedSockets,
-    const string& participantName, asio::io_context& ioContext,
-    SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger)
+    char* chardevSocketTransmitterArg, std::set<string>& alreadyProvidedSockets, const string& participantName,
+    asio::io_context& ioContext, SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger)
 {
     SocketToBytesPubSubAdapter* newAdapter;
     auto args = util::split(chardevSocketTransmitterArg, ",");
@@ -259,7 +250,7 @@ SocketToBytesPubSubAdapter* SocketToBytesPubSubAdapter::parseArgument(
     if (publisherName == "")
         publisherName = generatePublisherNameFrom(participantName);
     newAdapter = new SocketToBytesPubSubAdapter(ioContext, address, port, publisherName, subscriberName, pubDataSpec,
-                                                  subDataSpec, participant);
+                                                subDataSpec, participant);
 
     logger->Debug("Created Bytes-PubSub transmitter " + address + ':' + port + " <" + subscriberName + '('
                   + subDataSpec.Topic() + ')' + " >" + publisherName + '(' + pubDataSpec.Topic() + ')');

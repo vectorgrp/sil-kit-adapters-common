@@ -17,14 +17,19 @@ using namespace util;
 
 using namespace SilKit::Services::PubSub;
 
-inline int EchoDemoMain(int argc, char** argv, const std::string participantName, PubSubSpec subDataSpec, PubSubSpec pubDataSpec)
+inline int EchoDemoMain(int argc, char** argv, const std::string participantName, PubSubSpec subDataSpec,
+                        PubSubSpec pubDataSpec)
 {
     if (findArg(argc, argv, "--help", argv) != nullptr)
     {
         std::cout << "Usage (defaults in curly braces if you omit the switch):" << std::endl
-            << argv[0] << " [" << participantNameArg << " <participant's name{EchoDevice}>]\n"
-            "  [" << regUriArg << " silkit://<host{localhost}>:<port{8501}>]\n"
-            "  [" << logLevelArg << " <Trace|Debug|Warn|{Info}|Error|Critical|Off>]\n";
+                  << argv[0] << " [" << participantNameArg
+                  << " <participant's name{EchoDevice}>]\n"
+                     "  ["
+                  << regUriArg
+                  << " silkit://<host{localhost}>:<port{8501}>]\n"
+                     "  ["
+                  << logLevelArg << " <Trace|Debug|Warn|{Info}|Error|Critical|Off>]\n";
         return 0;
     }
 
@@ -48,25 +53,25 @@ inline int EchoDemoMain(int argc, char** argv, const std::string participantName
         auto dataSubscriber = participant->CreateDataSubscriber(
             participantName + "_sub", subDataSpec,
             [&](SilKit::Services::PubSub::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
-                if (dataMessageEvent.data.size() <= 4)
-                {
-                    std::cerr << "warning: message received probably wasn't following SAB format." << std::endl;
-                    line_buffer += std::string(reinterpret_cast<const char*>(dataMessageEvent.data.data()),
-                        dataMessageEvent.data.size());
-                }
-                else
-                {
-                    line_buffer += std::string(reinterpret_cast<const char*>(dataMessageEvent.data.data() + 4),
-                        dataMessageEvent.data.size() - 4);
-                }
-                std::string::size_type newline_pos;
-                while ((newline_pos = line_buffer.find_first_of('\n')) != std::string::npos)
-                {
-                    std::cout << "SIL Kit >> SIL Kit: " << line_buffer.substr(0, newline_pos) << std::endl;
-                    line_buffer.erase(0, newline_pos + 1);
-                }
-                dataPublisher->Publish(dataMessageEvent.data);
-            });
+            if (dataMessageEvent.data.size() <= 4)
+            {
+                std::cerr << "warning: message received probably wasn't following SAB format." << std::endl;
+                line_buffer += std::string(reinterpret_cast<const char*>(dataMessageEvent.data.data()),
+                                           dataMessageEvent.data.size());
+            }
+            else
+            {
+                line_buffer += std::string(reinterpret_cast<const char*>(dataMessageEvent.data.data() + 4),
+                                           dataMessageEvent.data.size() - 4);
+            }
+            std::string::size_type newline_pos;
+            while ((newline_pos = line_buffer.find_first_of('\n')) != std::string::npos)
+            {
+                std::cout << "SIL Kit >> SIL Kit: " << line_buffer.substr(0, newline_pos) << std::endl;
+                line_buffer.erase(0, newline_pos + 1);
+            }
+            dataPublisher->Publish(dataMessageEvent.data);
+        });
 
         promptForExit();
     }

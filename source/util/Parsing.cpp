@@ -19,9 +19,7 @@ const std::string adapters::helpArg = "--help";
 
 char** util::findArg(int argc, char** argv, const std::string& argument, char** args)
 {
-    auto found = std::find_if(args, argv + argc, [argument](const char* arg) -> bool {
-        return argument == arg;
-    });
+    auto found = std::find_if(args, argv + argc, [argument](const char* arg) -> bool { return argument == arg; });
     if (found < argv + argc)
     {
         return found;
@@ -47,4 +45,3 @@ std::string util::getArgDefault(int argc, char** argv, const std::string& argume
     else
         return defaultValue;
 };
-

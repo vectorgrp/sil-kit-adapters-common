@@ -17,21 +17,19 @@ using namespace util;
 
 const std::string defaultParticipantName = "SilKitAdapter";
 
-std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char** argv,
-    SilKit::Services::Logging::ILogger*& logger,
-    std::string* participantNameInputOutput,
-    SilKit::Services::Orchestration::ILifecycleService** lifecycleService,
-    std::promise<void>* runningStatePromise)
+std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
+    int argc, char** argv, SilKit::Services::Logging::ILogger*& logger, std::string* participantNameInputOutput,
+    SilKit::Services::Orchestration::ILifecycleService** lifecycleService, std::promise<void>* runningStatePromise)
 {
     std::unique_ptr<SilKit::IParticipant> result;
 
     std::string participantName;
     std::string defaultParticipantName;
-    defaultParticipantName = ((participantNameInputOutput && !participantNameInputOutput->empty())
-                                  ? *participantNameInputOutput
-                                  : ::defaultParticipantName);
+    defaultParticipantName =
+        ((participantNameInputOutput && !participantNameInputOutput->empty()) ? *participantNameInputOutput
+                                                                              : ::defaultParticipantName);
     /* else, let's use the content of the given participantNameInputOutput as default:*/
-    
+
     participantName = getArgDefault(argc, argv, participantNameArg, defaultParticipantName);
 
     const std::string registryURI = getArgDefault(argc, argv, regUriArg, "silkit://localhost:8501");
@@ -42,9 +40,8 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
     if (!configurationFile.empty())
     {
         participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(configurationFile);
-        static const auto conflictualArguments = {
-            &logLevelArg,
-            /* others are correctly handled by SilKit if one is overwritten.*/ };
+        static const auto conflictualArguments = {&logLevelArg,
+                                                  /* others are correctly handled by SilKit if one is overwritten.*/};
         for (const auto* conflictualArgument : conflictualArguments)
         {
             if (findArg(argc, argv, *conflictualArgument, argv) != nullptr)
@@ -55,8 +52,8 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
                     configFileName = configurationFile.substr(configurationFile.find_last_of("/\\") + 1);
                 }
                 std::cout << "[info] Be aware that argument given with " << *conflictualArgument
-                    << " can be overwritten by a different value defined in the given configuration file "
-                    << configFileName << std::endl;
+                          << " can be overwritten by a different value defined in the given configuration file "
+                          << configFileName << std::endl;
             }
         }
     }
@@ -65,8 +62,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
         const std::string loglevel = getArgDefault(argc, argv, logLevelArg, "Info");
         const std::string participantConfigurationString =
             R"({ "Logging": { "Sinks": [ { "Type": "Stdout", "Level": ")" + loglevel + R"("} ] } })";
-        participantConfiguration =
-            SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString);
+        participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString);
     }
 
     std::cout << "Creating participant '" << *participantNameInputOutput << "' at " << registryURI << std::endl;
@@ -74,29 +70,31 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
 
     logger = result->GetLogger();
 
-    if(lifecycleService)
+    if (lifecycleService)
     {
-        *lifecycleService = result->CreateLifecycleService({ SilKit::Services::Orchestration::OperationMode::Autonomous });
+        *lifecycleService =
+            result->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Autonomous});
     }
 
-    if(runningStatePromise)
+    if (runningStatePromise)
     {
         auto* systemMonitor = result->CreateSystemMonitor();
 
         systemMonitor->AddParticipantStatusHandler(
-            [runningStatePromise, participantNameInputOutput](const SilKit::Services::Orchestration::ParticipantStatus& status) {
-                if (*participantNameInputOutput == status.participantName)
+            [runningStatePromise,
+             participantNameInputOutput](const SilKit::Services::Orchestration::ParticipantStatus& status) {
+            if (*participantNameInputOutput == status.participantName)
+            {
+                if (status.state == SilKit::Services::Orchestration::ParticipantState::Running)
                 {
-                    if (status.state == SilKit::Services::Orchestration::ParticipantState::Running)
-                    {
-                        // Only call lifecycleservice->stop() after hitting this
-                        runningStatePromise->set_value();
-                    }
+                    // Only call lifecycleservice->stop() after hitting this
+                    runningStatePromise->set_value();
                 }
-            });
+            }
+        });
     }
 
-    if(participantNameInputOutput)
+    if (participantNameInputOutput)
     {
         *participantNameInputOutput = participantName;
     }
@@ -104,22 +102,21 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(int argc, char
 }
 
 
-void adapters::Stop(asio::io_context& ioContext,
-    std::thread& ioContextThread,
-    SilKit::Services::Logging::ILogger& logger,
-    std::promise<void>* runningStatePromise,
-    SilKit::Services::Orchestration::ILifecycleService* lifecycleService,
-    std::future<SilKit::Services::Orchestration::ParticipantState>* lifecycleServiceStartFuture)
+void adapters::Stop(asio::io_context& ioContext, std::thread& ioContextThread,
+                    SilKit::Services::Logging::ILogger& logger, std::promise<void>* runningStatePromise,
+                    SilKit::Services::Orchestration::ILifecycleService* lifecycleService,
+                    std::future<SilKit::Services::Orchestration::ParticipantState>* lifecycleServiceStartFuture)
 {
     ioContext.stop();
     ioContextThread.join();
 
-    if(runningStatePromise)
+    if (runningStatePromise)
     {
         auto runningStateStatus = runningStatePromise->get_future().wait_for(15s);
         if (runningStateStatus != std::future_status::ready)
         {
-            logger.Debug("Lifecycle Service Stopping: timed out while checking if the participant is currently running.");
+            logger.Debug(
+                "Lifecycle Service Stopping: timed out while checking if the participant is currently running.");
         }
         else
         {

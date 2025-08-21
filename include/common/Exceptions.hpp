@@ -59,7 +59,7 @@ class InvalidCli : public std::exception
 {
 };
 
-template<class exception>
+template <class exception>
 void throwIf(bool b)
 {
     if (b)

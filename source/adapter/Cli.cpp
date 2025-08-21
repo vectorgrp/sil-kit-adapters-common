@@ -12,9 +12,7 @@ void adapters::promptForExit()
 {
     std::promise<int> signalPromise;
     auto signalValue = signalPromise.get_future();
-    adapters::RegisterSignalHandler([&signalPromise](auto sigNum) {
-        signalPromise.set_value(sigNum);
-        });
+    adapters::RegisterSignalHandler([&signalPromise](auto sigNum) { signalPromise.set_value(sigNum); });
 
     std::cout << "Press CTRL + C to stop the process..." << std::endl;
 

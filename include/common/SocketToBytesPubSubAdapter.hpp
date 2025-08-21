@@ -25,9 +25,8 @@ class SocketToBytesPubSubAdapter
 
 public:
     SocketToBytesPubSubAdapter(asio::io_context& io_context, const string& host, const string& service,
-        const string& publisherName, const string& subscriberName,
-        const PubSubSpec& pubDataSpec, const PubSubSpec& subDataSpec,
-        SilKit::IParticipant* participant);
+                               const string& publisherName, const string& subscriberName, const PubSubSpec& pubDataSpec,
+                               const PubSubSpec& subDataSpec, SilKit::IParticipant* participant);
 
     static string printArgumentHelp(const string& prefix = "    ");
 
@@ -42,16 +41,15 @@ public:
     /// <param name="logger">Used for printing logging info.</param>
     /// <returns>A pointer to the created SocketToBytesPubSubAdapter.</returns>
     static SocketToBytesPubSubAdapter* parseArgument(char* bytesSocketTransmitterArg,
-        std::set<string>& alreadyProvidedSockets,
-        const string& participantName,
-        asio::io_context& ioContext,
-        SilKit::IParticipant* participant,
-        SilKit::Services::Logging::ILogger* logger);
+                                                     std::set<string>& alreadyProvidedSockets,
+                                                     const string& participantName, asio::io_context& ioContext,
+                                                     SilKit::IParticipant* participant,
+                                                     SilKit::Services::Logging::ILogger* logger);
 
 
 private:
     //internal callbacks
-    template<bool debug_activated>
+    template <bool debug_activated>
     void DoReceiveFrameFromSocket();
 
 private:
