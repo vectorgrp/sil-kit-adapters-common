@@ -21,7 +21,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
     int argc, char** argv, SilKit::Services::Logging::ILogger*& logger, std::string* participantNameInputOutput,
     SilKit::Services::Orchestration::ILifecycleService** lifecycleService, std::promise<void>* runningStatePromise)
 {
-    std::unique_ptr<SilKit::IParticipant> result;
+    std::unique_ptr<SilKit::IParticipant> participant;
 
     std::string participantName;
     std::string defaultParticipantName;
@@ -65,39 +65,27 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
         participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString);
     }
 
-    result = SilKit::CreateParticipant(participantConfiguration, participantName, registryURI);
+    participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryURI);
 
-    logger = result->GetLogger();
+    logger = participant->GetLogger();
 
     if (lifecycleService)
     {
         *lifecycleService =
-            result->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Autonomous});
+            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Autonomous});
     }
 
     if (runningStatePromise)
     {
-        auto* systemMonitor = result->CreateSystemMonitor();
-
-        systemMonitor->AddParticipantStatusHandler(
-            [runningStatePromise,
-             participantName](const SilKit::Services::Orchestration::ParticipantStatus& status) {
-            if (participantName == status.participantName)
-            {
-                if (status.state == SilKit::Services::Orchestration::ParticipantState::Running)
-                {
-                    // Only call lifecycleservice->stop() after hitting this
-                    runningStatePromise->set_value();
-                }
-            }
-        });
+        (*lifecycleService)->SetStartingHandler(
+            [runningStatePromise](){ runningStatePromise->set_value(); });
     }
 
     if (participantNameInputOutput)
     {
         *participantNameInputOutput = participantName;
     }
-    return result;
+    return participant;
 }
 
 
