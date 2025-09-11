@@ -9,4 +9,14 @@ jobs:
     uses: pnd/sil-kit-adapters-qemu/.github/workflows/trigger-adapters-ci.yaml@main
     with:
       common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      runner: '["self-hosted", "linux", "ska", "testing", "qemu"]'
+    secrets: inherit
+
+  test-glio-adapter:
+    uses: pnd/sil-kit-adapters-generic-linux-io/.github/workflows/trigger-adapters-ci.yaml@main
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      runner: '["self-hosted", "linux", "ska", "testing", "glio"]'
     secrets: inherit
