@@ -6,6 +6,9 @@
 #include <type_traits>
 
 #include "asio/ts/buffer.hpp"
+#include "asio/local/stream_protocol.hpp"
+#include "asio/ip/tcp.hpp"
+
 #include "silkit/services/logging/all.hpp"
 #include "silkit/util/serdes/Serialization.hpp"
 
@@ -57,7 +60,8 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
 SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_context, const string& host,
                                                        const string& service, const string& publisherName,
                                                        const string& subscriberName, const PubSubSpec& pubDataSpec,
-                                                       const PubSubSpec& subDataSpec, SilKit::IParticipant* participant)
+                                                       const PubSubSpec& subDataSpec, SilKit::IParticipant* participant,
+                                                       const bool enableDomainSockets)
     : _socket{io_context}
     , _logger{participant->GetLogger()}
     , _publisher{participant->CreateDataPublisher(publisherName, pubDataSpec)}
@@ -90,13 +94,33 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
 {
     try
     {
-        asio::connect(_socket, asio::ip::tcp::resolver{io_context}.resolve(host, service));
+        if (enableDomainSockets)
+        {
+            asio::local::stream_protocol::endpoint endpoint(host);
+            _socket.connect(endpoint);
+        }
+        else
+        {
+            asio::ip::tcp::resolver resolver(io_context);
+            auto endpoints = resolver.resolve(host, service);
+
+            asio::ip::tcp::socket temp_socket(io_context);
+            asio::connect(temp_socket, endpoints);
+            _socket = asio::generic::stream_protocol::socket(std::move(temp_socket));
+        }
     }
     catch (std::exception& e)
     {
         std::ostringstream error_message;
         error_message << e.what() << std::endl;
-        error_message << "Error encountered while trying to connect to socket at \"" << host << ':' << service << '"';
+        if (enableDomainSockets)
+        {
+            error_message << "Error encountered while trying to connect to Unix Domain Socket at \"" << host << '"';
+        }
+        else
+        {
+            error_message << "Error encountered while trying to connect to socket at \"" << host << ':' << service << '"';
+        }
         throw std::runtime_error(error_message.str());
     }
     _logger->Info("Socket connect success");
@@ -194,9 +218,9 @@ string generatePublisherNameFrom(const string& participantName)
     return base + std::to_string(count++);
 }
 
-string SocketToBytesPubSubAdapter::printArgumentHelp(const string& prefix)
+string SocketToBytesPubSubAdapter::printArgumentHelp(const string& socketArg, const string& prefix)
 {
-    return prefix + " <host>:<port>,\n" + prefix + "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n"
+    return prefix + " " + socketArg + ",\n" + prefix + "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n"
            + prefix + "   [[,<label key>:<optional label value>\n" + prefix
            + "    |,<label key>=<mandatory label value>\n" + prefix + "   ]],\n" + prefix
            + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n" + prefix
@@ -204,21 +228,28 @@ string SocketToBytesPubSubAdapter::printArgumentHelp(const string& prefix)
            + prefix + "   ]]\n";
 }
 
-SocketToBytesPubSubAdapter* SocketToBytesPubSubAdapter::parseArgument(
+std::unique_ptr<SocketToBytesPubSubAdapter> SocketToBytesPubSubAdapter::parseArgument(
     char* chardevSocketTransmitterArg, std::set<string>& alreadyProvidedSockets, const string& participantName,
-    asio::io_context& ioContext, SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger)
+    asio::io_context& ioContext, SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger,
+    const bool isUnixSocket)
 {
-    SocketToBytesPubSubAdapter* newAdapter;
     auto args = util::split(chardevSocketTransmitterArg, ",");
     auto arg_iter = args.begin();
 
-    //handle <address>:<port>
     util::assertAdditionalIterator(arg_iter, args);
     throwInvalidCliIf(alreadyProvidedSockets.insert(*arg_iter).second == false);
-    auto portAddress = util::split(*arg_iter++, ":");
-    throwInvalidCliIf(portAddress.size() != 2);
-    const auto& address = portAddress[0];
-    const auto& port = portAddress[1];
+
+    std::string address, port, debug_message;
+    if (isUnixSocket)
+    {
+        extractUnixSocket(address, port, arg_iter);
+        debug_message = "Created Bytes-PubSub transmitter " + address;
+    }
+    else // TCP Socket
+    {
+        extractTcpSocket(address, port, arg_iter);
+        debug_message = "Created Bytes-PubSub transmitter " + address + ':' + port;
+    }
 
     //handle inbound topic and labels
     util::assertAdditionalIterator(arg_iter, args);
@@ -249,11 +280,12 @@ SocketToBytesPubSubAdapter* SocketToBytesPubSubAdapter::parseArgument(
         subscriberName = generateSubscriberNameFrom(participantName);
     if (publisherName == "")
         publisherName = generatePublisherNameFrom(participantName);
-    newAdapter = new SocketToBytesPubSubAdapter(ioContext, address, port, publisherName, subscriberName, pubDataSpec,
-                                                subDataSpec, participant);
+    auto newAdapter = std::make_unique<SocketToBytesPubSubAdapter>(ioContext, address, port, publisherName, subscriberName, pubDataSpec,
+                                                subDataSpec, participant, isUnixSocket);
 
-    logger->Debug("Created Bytes-PubSub transmitter " + address + ':' + port + " <" + subscriberName + '('
-                  + subDataSpec.Topic() + ')' + " >" + publisherName + '(' + pubDataSpec.Topic() + ')');
+    debug_message += " <" + subscriberName + '('
+                  + subDataSpec.Topic() + ')' + " >" + publisherName + '(' + pubDataSpec.Topic() + ')';
+    logger->Debug(debug_message);
 
-    return newAdapter;
+    return std::move(newAdapter);
 }
