@@ -52,6 +52,7 @@ function(install_adapter_source)
             PATTERN *.xml
             PATTERN *.fbbin
             PATTERN *.md
+            PATTERN *.rst
             PATTERN *.png
             PATTERN *.1
             PATTERN Dockerfile
