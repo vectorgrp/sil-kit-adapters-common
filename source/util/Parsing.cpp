@@ -17,6 +17,8 @@ const std::string adapters::participantNameArg = "--name";
 
 const std::string adapters::helpArg = "--help";
 
+const std::string adapters::versionArg = "--version";
+
 char** util::findArg(int argc, char** argv, const std::string& argument, char** args)
 {
     auto found = std::find_if(args, argv + argc, [argument](const char* arg) -> bool { return argument == arg; });

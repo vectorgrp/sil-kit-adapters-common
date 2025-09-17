@@ -170,4 +170,9 @@ extern const std::string participantNameArg;
 /// </summary>
 extern const std::string helpArg;
 
+/// <summary>
+/// string containing the argument requesting the version of the adapter.
+/// </summary>
+extern const std::string versionArg;
+
 } // namespace adapters
