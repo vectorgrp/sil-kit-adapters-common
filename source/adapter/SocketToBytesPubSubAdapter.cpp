@@ -32,18 +32,18 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
         // This skipped part will contain the SIL Kit-serialized array length.
         asio::buffer(_data_buffer_toPublisher.data() + array_length_size, usable_size),
         [this](const std::error_code ec, const std::size_t bytes_received) {
-            if (ec)
-            {
-                _logger->Error("Error during socket read. Closing the socket and shutting down the adapter. (error code="
-                               + std::to_string(ec.value()) + ", message=" + ec.message() + ")");
-                _socket.close();
-                _ioContext->stop();
+        if (ec)
+        {
+            _logger->Error("Error during socket read. Closing the socket and shutting down the adapter. (error code="
+                           + std::to_string(ec.value()) + ", message=" + ec.message() + ")");
+            _socket.close();
+            _ioContext->stop();
 #ifdef WIN32
-                GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+            GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
 #else
-                std::raise(SIGINT);
+            std::raise(SIGINT);
 #endif
-            }
+        }
 
         // Templating will optimize this (including string building) out for cases when debug
         //  is not configured.
@@ -131,7 +131,8 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
         }
         else
         {
-            error_message << "Error encountered while trying to connect to socket at \"" << host << ':' << service << '"';
+            error_message << "Error encountered while trying to connect to socket at \"" << host << ':' << service
+                          << '"';
         }
         throw std::runtime_error(error_message.str());
     }
@@ -292,11 +293,11 @@ std::unique_ptr<SocketToBytesPubSubAdapter> SocketToBytesPubSubAdapter::parseArg
         subscriberName = generateSubscriberNameFrom(participantName);
     if (publisherName == "")
         publisherName = generatePublisherNameFrom(participantName);
-    auto newAdapter = std::make_unique<SocketToBytesPubSubAdapter>(ioContext, address, port, publisherName, subscriberName, pubDataSpec,
-                                                subDataSpec, participant, isUnixSocket);
+    auto newAdapter = std::make_unique<SocketToBytesPubSubAdapter>(
+        ioContext, address, port, publisherName, subscriberName, pubDataSpec, subDataSpec, participant, isUnixSocket);
 
-    debug_message += " <" + subscriberName + '('
-                  + subDataSpec.Topic() + ')' + " >" + publisherName + '(' + pubDataSpec.Topic() + ')';
+    debug_message += " <" + subscriberName + '(' + subDataSpec.Topic() + ')' + " >" + publisherName + '('
+                     + pubDataSpec.Topic() + ')';
     logger->Debug(debug_message);
 
     return std::move(newAdapter);

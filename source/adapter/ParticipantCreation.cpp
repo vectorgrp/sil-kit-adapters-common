@@ -77,8 +77,7 @@ std::unique_ptr<SilKit::IParticipant> adapters::CreateParticipant(
 
     if (runningStatePromise)
     {
-        (*lifecycleService)->SetStartingHandler(
-            [runningStatePromise](){ runningStatePromise->set_value(); });
+        (*lifecycleService)->SetStartingHandler([runningStatePromise]() { runningStatePromise->set_value(); });
     }
 
     if (participantNameInputOutput)

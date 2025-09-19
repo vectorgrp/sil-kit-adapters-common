@@ -49,7 +49,8 @@ class SocketToBytesPubSubAdapter
 public:
     SocketToBytesPubSubAdapter(asio::io_context& io_context, const string& host, const string& service,
                                const string& publisherName, const string& subscriberName, const PubSubSpec& pubDataSpec,
-                               const PubSubSpec& subDataSpec, SilKit::IParticipant* participant, const bool enableDomainSockets);
+                               const PubSubSpec& subDataSpec, SilKit::IParticipant* participant,
+                               const bool enableDomainSockets);
 
     static string printArgumentHelp(const string& socketArg, const string& prefix = "    ");
 
@@ -63,12 +64,10 @@ public:
     /// <param name="participant">Passed to constructor of class SocketToBytesPubSubAdapter.</param>
     /// <param name="logger">Used for printing logging info.</param>
     /// <returns>A pointer to the created SocketToBytesPubSubAdapter.</returns>
-    static std::unique_ptr<SocketToBytesPubSubAdapter> parseArgument(char* bytesSocketTransmitterArg,
-                                                     std::set<string>& alreadyProvidedSockets,
-                                                     const string& participantName, asio::io_context& ioContext,
-                                                     SilKit::IParticipant* participant,
-                                                     SilKit::Services::Logging::ILogger* logger,
-                                                     const bool isUnixSocket);
+    static std::unique_ptr<SocketToBytesPubSubAdapter> parseArgument(
+        char* bytesSocketTransmitterArg, std::set<string>& alreadyProvidedSockets, const string& participantName,
+        asio::io_context& ioContext, SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger,
+        const bool isUnixSocket);
 
 private:
     //internal callbacks
