@@ -76,6 +76,7 @@ private:
     void DoReceiveFrameFromSocket();
 
 private:
+    asio::io_context* _ioContext;
     asio::generic::stream_protocol::socket _socket;
     SilKit::Services::Logging::ILogger* _logger;
     std::array<uint8_t, 4096> _data_buffer_toPublisher = {};

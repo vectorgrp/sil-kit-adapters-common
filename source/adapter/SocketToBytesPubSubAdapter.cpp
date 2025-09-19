@@ -4,6 +4,7 @@
 #include "SocketToBytesPubSubAdapter.hpp"
 
 #include <type_traits>
+#include <csignal>
 
 #include "asio/ts/buffer.hpp"
 #include "asio/local/stream_protocol.hpp"
@@ -31,8 +32,18 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
         // This skipped part will contain the SIL Kit-serialized array length.
         asio::buffer(_data_buffer_toPublisher.data() + array_length_size, usable_size),
         [this](const std::error_code ec, const std::size_t bytes_received) {
-        if (ec)
-            throw IncompleteReadError{};
+            if (ec)
+            {
+                _logger->Error("Error during socket read. Closing the socket and shutting down the adapter. (error code="
+                               + std::to_string(ec.value()) + ", message=" + ec.message() + ")");
+                _socket.close();
+                _ioContext->stop();
+#ifdef WIN32
+                GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+#else
+                std::raise(SIGINT);
+#endif
+            }
 
         // Templating will optimize this (including string building) out for cases when debug
         //  is not configured.
@@ -62,7 +73,8 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
                                                        const string& subscriberName, const PubSubSpec& pubDataSpec,
                                                        const PubSubSpec& subDataSpec, SilKit::IParticipant* participant,
                                                        const bool enableDomainSockets)
-    : _socket{io_context}
+    : _ioContext{&io_context}
+    , _socket{io_context}
     , _logger{participant->GetLogger()}
     , _publisher{participant->CreateDataPublisher(publisherName, pubDataSpec)}
     , _subscriber{participant->CreateDataSubscriber(
