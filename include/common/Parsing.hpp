@@ -6,6 +6,8 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
+#include <iostream>
+#include <vector>
 #include "Exceptions.hpp"
 
 namespace util {
@@ -169,10 +171,84 @@ extern const std::string participantNameArg;
 /// string containing the argument requesting the help message.
 /// </summary>
 extern const std::string helpArg;
-
+  
 /// <summary>
 /// string containing the argument requesting the version of the adapter.
 /// </summary>
 extern const std::string versionArg;
+  
+/// <summary>
+/// string containing the argument preceding the endianness selection (big_endian|little_endian).
+/// </summary>
+extern const std::string endiannessArg;
 
+/// <summary>
+/// Collects positional socket specs while validating switches and their values.
+/// </summary>
+template <class SwitchesWithArg, class SwitchesWithoutArg>
+inline std::vector<char*> CollectPositionalSocketArgs(int argc, char** argv,
+                                            const SwitchesWithArg& switchesWithArg,
+                                            const SwitchesWithoutArg& switchesWithoutArg)
+{
+    std::vector<char*> specs;
+    for (int i = 1; i < argc; ++i)
+    {
+        char* current = argv[i];
+        if (std::strncmp(current, "--", 2) == 0)
+        {
+            auto matches = [current](auto sPtr){ return *sPtr == current; };
+            if (std::find_if(switchesWithArg.begin(), switchesWithArg.end(), matches) != switchesWithArg.end())
+            {
+                if (i + 1 >= argc)
+                {
+                    std::cerr << "Missing value for switch '" << current << "'." << std::endl;
+                    throw adapters::InvalidCli();
+                }
+                // Skip value; retrieval handled separately.
+                ++i;
+                continue;
+            }
+            if (std::find_if(switchesWithoutArg.begin(), switchesWithoutArg.end(), matches) != switchesWithoutArg.end())
+            {
+                continue; // skip flag
+            }
+            std::cerr << "Unknown switch '" << current << "'." << std::endl;
+            throw adapters::InvalidCli();
+        }
+        specs.push_back(current);
+    }
+    if (specs.empty())
+    {
+        std::cerr << "Missing required socket specification positional argument <host>:<port>,<toAdapterTopic>,<fromAdapterTopic>." << std::endl;
+        throw adapters::InvalidCli();
+    }
+    return specs;
+}
+
+namespace help {
+// Merged from ArgumentHelp.hpp (kept inline for header-only usage)
+
+/// <summary>
+/// Returns the help text for topic specification
+/// </summary>
+inline std::string TopicSpecificationHelp(const std::string& indent = "    ")
+{
+        return "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n"
+        + indent + "[,<label key>:<optional label value>\n"
+        + indent + " |,<label key>=<mandatory label value>],\n"
+        + indent + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n"
+        + indent + "[,<label key>:<optional label value>\n"
+        + indent + " |,<label key>=<mandatory label value>]";
+}
+
+/// <summary>
+/// Returns the complete help text for socket adapter arguments including socket address and topic specification.
+/// </summary>
+inline std::string SocketAdapterArgumentHelp(const std::string& socketArg, const std::string& indent = "    ")
+{
+    // We prepend a space before the opening '[' so that adapters can concatenate directly after executable name.
+    return " [" + socketArg + "," + TopicSpecificationHelp(indent) + "]";
+}
+
+} // namespace help
 } // namespace adapters
