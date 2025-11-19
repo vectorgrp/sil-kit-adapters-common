@@ -13,7 +13,8 @@
 #include "StringUtils.hpp"
 #include "silkit/services/pubsub/all.hpp"
 
-namespace adapters { namespace util_topic {
+namespace adapters {
+namespace util_topic {
 
 using string = std::string;
 
@@ -62,7 +63,7 @@ inline void extractAndEraseNamespaceAndDefaultnameFrom(string& topicname, string
 }
 
 inline void extractTopicLabels(const std::vector<string>& args, std::vector<string>::iterator& arg_iter,
-                        SilKit::Services::PubSub::PubSubSpec& dataSpec)
+                               SilKit::Services::PubSub::PubSubSpec& dataSpec)
 {
     for (; arg_iter != args.end() && (count(*arg_iter, ':') == 1 || count(*arg_iter, '=') == 1); ++arg_iter)
     {
@@ -88,4 +89,5 @@ inline string generatePublisherNameFrom(const string& participantName)
     return participantName + "_pub_" + std::to_string(count++);
 }
 
-} } // namespace adapters::util_topic
+} // namespace util_topic
+} // namespace adapters

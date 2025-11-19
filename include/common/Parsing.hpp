@@ -171,12 +171,12 @@ extern const std::string participantNameArg;
 /// string containing the argument requesting the help message.
 /// </summary>
 extern const std::string helpArg;
-  
+
 /// <summary>
 /// string containing the argument requesting the version of the adapter.
 /// </summary>
 extern const std::string versionArg;
-  
+
 /// <summary>
 /// string containing the argument preceding the endianness selection (big_endian|little_endian).
 /// </summary>
@@ -186,9 +186,8 @@ extern const std::string endiannessArg;
 /// Collects positional socket specs while validating switches and their values.
 /// </summary>
 template <class SwitchesWithArg, class SwitchesWithoutArg>
-inline std::vector<char*> CollectPositionalSocketArgs(int argc, char** argv,
-                                            const SwitchesWithArg& switchesWithArg,
-                                            const SwitchesWithoutArg& switchesWithoutArg)
+inline std::vector<char*> CollectPositionalSocketArgs(int argc, char** argv, const SwitchesWithArg& switchesWithArg,
+                                                      const SwitchesWithoutArg& switchesWithoutArg)
 {
     std::vector<char*> specs;
     for (int i = 1; i < argc; ++i)
@@ -196,7 +195,7 @@ inline std::vector<char*> CollectPositionalSocketArgs(int argc, char** argv,
         char* current = argv[i];
         if (std::strncmp(current, "--", 2) == 0)
         {
-            auto matches = [current](auto sPtr){ return *sPtr == current; };
+            auto matches = [current](auto sPtr) { return *sPtr == current; };
             if (std::find_if(switchesWithArg.begin(), switchesWithArg.end(), matches) != switchesWithArg.end())
             {
                 if (i + 1 >= argc)
@@ -219,7 +218,9 @@ inline std::vector<char*> CollectPositionalSocketArgs(int argc, char** argv,
     }
     if (specs.empty())
     {
-        std::cerr << "Missing required socket specification positional argument <host>:<port>,<toAdapterTopic>,<fromAdapterTopic>." << std::endl;
+        std::cerr << "Missing required socket specification positional argument "
+                     "<host>:<port>,<toAdapterTopic>,<fromAdapterTopic>."
+                  << std::endl;
         throw adapters::InvalidCli();
     }
     return specs;
@@ -233,12 +234,10 @@ namespace help {
 /// </summary>
 inline std::string TopicSpecificationHelp(const std::string& indent = "    ")
 {
-        return "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n"
-        + indent + "[,<label key>:<optional label value>\n"
-        + indent + " |,<label key>=<mandatory label value>],\n"
-        + indent + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n"
-        + indent + "[,<label key>:<optional label value>\n"
-        + indent + " |,<label key>=<mandatory label value>]";
+    return "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n" + indent
+           + "[,<label key>:<optional label value>\n" + indent + " |,<label key>=<mandatory label value>],\n" + indent
+           + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n" + indent
+           + "[,<label key>:<optional label value>\n" + indent + " |,<label key>=<mandatory label value>]";
 }
 
 /// <summary>

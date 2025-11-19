@@ -9,7 +9,8 @@
 #include "Parsing.hpp"
 #include "StringUtils.hpp"
 
-namespace adapters { namespace util_socket {
+namespace adapters {
+namespace util_socket {
 
 inline void extractTcpSocket(std::string& address, std::string& port, std::vector<std::string>::iterator& arg_iter)
 {
@@ -25,4 +26,5 @@ inline void extractUnixSocket(std::string& address, std::string& port, std::vect
     port = "-1"; // sentinel for UDS
 }
 
-} } // namespace adapters::util_socket
+} // namespace util_socket
+} // namespace adapters

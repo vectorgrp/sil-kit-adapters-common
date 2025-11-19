@@ -13,11 +13,8 @@ using namespace adapters;
 using namespace SilKit::Services::PubSub;
 
 SocketToPubSubAdapter::ParsedPubSubConfig SocketToPubSubAdapter::parseArgument(
-    char* rawArg,
-    std::set<std::string>& alreadyProvidedSockets,
-    const std::string& participantName,
-    SilKit::Services::Logging::ILogger* logger,
-    bool isUnixSocket)
+    char* rawArg, std::set<std::string>& alreadyProvidedSockets, const std::string& participantName,
+    SilKit::Services::Logging::ILogger* logger, bool isUnixSocket)
 {
     auto args = util::split(rawArg, ",");
     auto it = args.begin();
@@ -68,19 +65,21 @@ SocketToPubSubAdapter::ParsedPubSubConfig SocketToPubSubAdapter::parseArgument(
 
 void SocketToPubSubAdapter::CreatePublisher()
 {
-    if (_publisher) return;
+    if (_publisher)
+        return;
     _publisher = _participant->CreateDataPublisher(_publisherName, _pubSpec);
 }
 
 void SocketToPubSubAdapter::CreateSubscriber()
 {
-    if (_subscriber) return;
+    if (_subscriber)
+        return;
     _subscriber = _participant->CreateDataSubscriber(
         _subscriberName, _subSpec,
         SilKit::Services::PubSub::DataMessageHandler{
             [this](SilKit::Services::PubSub::IDataSubscriber*, const SilKit::Services::PubSub::DataMessageEvent& evt) {
-                OnInbound(evt);
-            }});
+        OnInbound(evt);
+    }});
 }
 
 void SocketToPubSubAdapter::OnSocketConnected()

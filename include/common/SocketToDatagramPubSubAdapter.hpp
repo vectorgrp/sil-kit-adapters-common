@@ -30,13 +30,10 @@ namespace datagram_socket {
 
 class SocketToDatagramPubSubAdapter : public SocketToPubSubAdapter
 {
-
 public:
     using ParsedPubSubConfig = SocketToPubSubAdapter::ParsedPubSubConfig;
-    SocketToDatagramPubSubAdapter(asio::io_context& io_context,
-                                  SilKit::IParticipant* participant,
-                                  const ParsedPubSubConfig& cfg,
-                                  Endianness endianness, uint8_t headerSize);
+    SocketToDatagramPubSubAdapter(asio::io_context& io_context, SilKit::IParticipant* participant,
+                                  const ParsedPubSubConfig& cfg, Endianness endianness, uint8_t headerSize);
 
     /// <summary>
     /// Parse the complex string given as the argument requesting an adaptation from a socket to a publisher/subscriber.
@@ -50,18 +47,15 @@ public:
     /// <param name="headerSize">The size of the header of the Datagram.</param>
     /// <param name="logger">Used for printing logging info.</param>
     /// <returns>A pointer to the created SocketToDatagramAdapter.</returns>
-    static std::unique_ptr<SocketToDatagramPubSubAdapter> parseArgument(char* dataGramTransmitterArg,
-                                                     std::set<std::string>& alreadyProvidedSockets,
-                                                     const std::string& participantName, asio::io_context& ioContext,
-                                                     SilKit::IParticipant* participant,
-                                                     Endianness endianness,
-                                                     uint8_t headerSize,
-                                                     SilKit::Services::Logging::ILogger* logger);
+    static std::unique_ptr<SocketToDatagramPubSubAdapter> parseArgument(
+        char* dataGramTransmitterArg, std::set<std::string>& alreadyProvidedSockets, const std::string& participantName,
+        asio::io_context& ioContext, SilKit::IParticipant* participant, Endianness endianness, uint8_t headerSize,
+        SilKit::Services::Logging::ILogger* logger);
 
     void WriteOutbound(const uint8_t* data, size_t size) override;
     void StartReceivingFromSocket() override;
     void OnInbound(const SilKit::Services::PubSub::DataMessageEvent& evt) override;
-    
+
 private:
     //internal callbacks
     template <bool debug_activated>

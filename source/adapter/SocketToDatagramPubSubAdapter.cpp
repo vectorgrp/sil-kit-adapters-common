@@ -31,46 +31,43 @@ void SocketToDatagramPubSubAdapter::DoReceiveFrameFromSocket()
     }
 
     asio::async_read(_socket, asio::buffer(_frame_size_buffer.data(), _headerSize),
-        [this](std::error_code ec, std::size_t nReadHeader) {
-            if (ec || nReadHeader != _headerSize)
+                     [this](std::error_code ec, std::size_t nReadHeader) {
+        if (ec || nReadHeader != _headerSize)
+        {
+            ShutdownAdapter("Socket read error while reading length header (code=" + std::to_string(ec.value())
+                            + ", msg=" + ec.message() + ")");
+            return;
+        }
+
+        uint32_t frame_size = 0;
+        for (unsigned i = 0; i < _headerSize; ++i)
+        {
+            unsigned srcIndex = (_endianness == Endianness::big_endian) ? (_headerSize - 1 - i) : i;
+            frame_size |= static_cast<uint32_t>(_frame_size_buffer[srcIndex]) << (8u * i);
+        }
+
+        // Ensure buffer capacity (prefix + payload)
+        _data_buffer_toPublisher.resize(SilKitHeaderSize + frame_size);
+
+        asio::async_read(_socket, asio::buffer(_data_buffer_toPublisher.data() + SilKitHeaderSize, frame_size),
+                         [this, frame_size](std::error_code ecPayload, std::size_t nReadPayload) {
+            if (ecPayload || nReadPayload != frame_size)
             {
-                ShutdownAdapter("Socket read error while reading length header (code=" + std::to_string(ec.value())
-                    + ", msg=" + ec.message() + ")");
+                ShutdownAdapter("Socket read error while reading payload (code=" + std::to_string(ecPayload.value())
+                                + ", msg=" + ecPayload.message() + ")");
                 return;
             }
 
-            uint32_t frame_size = 0;
-            for (unsigned i = 0; i < _headerSize; ++i)
-            {
-                unsigned srcIndex = (_endianness == Endianness::big_endian)
-                    ? (_headerSize - 1 - i)
-                    : i;
-                frame_size |= static_cast<uint32_t>(_frame_size_buffer[srcIndex]) << (8u * i);
-            }
-
-            // Ensure buffer capacity (prefix + payload)
-            _data_buffer_toPublisher.resize(SilKitHeaderSize + frame_size);
-
-            asio::async_read(_socket,
-                asio::buffer(_data_buffer_toPublisher.data() + SilKitHeaderSize, frame_size),
-                [this, frame_size](std::error_code ecPayload, std::size_t nReadPayload) {
-                    if (ecPayload || nReadPayload != frame_size)
-                    {
-                        ShutdownAdapter("Socket read error while reading payload (code=" + std::to_string(ecPayload.value())
-                            + ", msg=" + ecPayload.message() + ")");
-                        return;
-                    }
-
-                    SerializeAndPublish(_data_buffer_toPublisher.data(), nReadPayload);
-                    DoReceiveFrameFromSocket<debug_activated>();
-                });
+            SerializeAndPublish(_data_buffer_toPublisher.data(), nReadPayload);
+            DoReceiveFrameFromSocket<debug_activated>();
         });
+    });
 }
 
 SocketToDatagramPubSubAdapter::SocketToDatagramPubSubAdapter(asio::io_context& io_context,
                                                              SilKit::IParticipant* participant,
-                                                             const ParsedPubSubConfig& cfg,
-                                                             Endianness endianness, uint8_t headerSize)
+                                                             const ParsedPubSubConfig& cfg, Endianness endianness,
+                                                             uint8_t headerSize)
     : SocketToPubSubAdapter(io_context, participant, cfg.publisherName, cfg.pubSpec, cfg.subscriberName, cfg.subSpec)
     , _headerSize{headerSize}
     , _endianness{endianness}
@@ -88,7 +85,8 @@ SocketToDatagramPubSubAdapter::SocketToDatagramPubSubAdapter(asio::io_context& i
     {
         std::ostringstream error_message;
         error_message << e.what() << std::endl;
-        error_message << "Error encountered while trying to connect to socket at \"" << cfg.address << ':' << cfg.port << '"';
+        error_message << "Error encountered while trying to connect to socket at \"" << cfg.address << ':' << cfg.port
+                      << '"';
         throw std::runtime_error(error_message.str());
     }
     _logger->Info("Socket connection successfully established");
@@ -96,18 +94,20 @@ SocketToDatagramPubSubAdapter::SocketToDatagramPubSubAdapter(asio::io_context& i
 }
 
 std::unique_ptr<SocketToDatagramPubSubAdapter> SocketToDatagramPubSubAdapter::parseArgument(
-    char* datagramSocketTransmitterArg, std::set<std::string>& alreadyProvidedSockets, const std::string& participantName,
-    asio::io_context& ioContext, SilKit::IParticipant* participant,
-    Endianness endianness, uint8_t headerSize,
-    SilKit::Services::Logging::ILogger* logger)
+    char* datagramSocketTransmitterArg, std::set<std::string>& alreadyProvidedSockets,
+    const std::string& participantName, asio::io_context& ioContext, SilKit::IParticipant* participant,
+    Endianness endianness, uint8_t headerSize, SilKit::Services::Logging::ILogger* logger)
 {
-    auto cfg = SocketToPubSubAdapter::parseArgument(datagramSocketTransmitterArg, alreadyProvidedSockets, participantName, logger, false);
+    auto cfg = SocketToPubSubAdapter::parseArgument(datagramSocketTransmitterArg, alreadyProvidedSockets,
+                                                    participantName, logger, false);
 
     std::string debugPrefix = "Created Datagram-PubSub transmitter " + cfg.address + ':' + cfg.port;
 
-    auto newAdapter = std::make_unique<SocketToDatagramPubSubAdapter>(ioContext, participant, cfg, endianness, headerSize);
+    auto newAdapter =
+        std::make_unique<SocketToDatagramPubSubAdapter>(ioContext, participant, cfg, endianness, headerSize);
 
-    std::string debug_message = debugPrefix + " <" + cfg.subscriberName + '(' + cfg.subSpec.Topic() + ')' + " >" + cfg.publisherName + '(' + cfg.pubSpec.Topic() + ')';
+    std::string debug_message = debugPrefix + " <" + cfg.subscriberName + '(' + cfg.subSpec.Topic() + ')' + " >"
+                                + cfg.publisherName + '(' + cfg.pubSpec.Topic() + ')';
     logger->Debug(debug_message);
     return newAdapter;
 }
@@ -120,12 +120,13 @@ void SocketToDatagramPubSubAdapter::WriteOutbound(const uint8_t* data, size_t si
             _logger->Debug("SocketToDatagramPubSubAdapter: outbound dropped (socket not connected)");
         return;
     }
-    auto frameSizeBytes = adapters::datagram_socket::WriteFrameSizeToArray(static_cast<uint32_t>(size), _endianness, _headerSize);
+    auto frameSizeBytes =
+        adapters::datagram_socket::WriteFrameSizeToArray(static_cast<uint32_t>(size), _endianness, _headerSize);
     asio::write(_socket, asio::buffer(frameSizeBytes.data(), _headerSize));
     asio::write(_socket, asio::buffer(data, size));
 }
 
-void SocketToDatagramPubSubAdapter::StartReceivingFromSocket() 
+void SocketToDatagramPubSubAdapter::StartReceivingFromSocket()
 {
     if (_debugEnabled)
         DoReceiveFrameFromSocket<true>();
@@ -133,7 +134,7 @@ void SocketToDatagramPubSubAdapter::StartReceivingFromSocket()
         DoReceiveFrameFromSocket<false>();
 }
 
-void SocketToDatagramPubSubAdapter::OnInbound(const SilKit::Services::PubSub::DataMessageEvent& evt) 
+void SocketToDatagramPubSubAdapter::OnInbound(const SilKit::Services::PubSub::DataMessageEvent& evt)
 {
     HandleInboundImpl(_data_buffer_toPublisher, evt);
 }

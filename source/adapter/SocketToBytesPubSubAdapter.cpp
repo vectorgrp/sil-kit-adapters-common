@@ -35,13 +35,15 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
         [this](const std::error_code ec, const std::size_t bytes_received) {
         if (ec)
         {
-            ShutdownAdapter("Socket read error while reading bytes (code=" + std::to_string(ec.value()) + ", msg=" + ec.message() + ")");
+            ShutdownAdapter("Socket read error while reading bytes (code=" + std::to_string(ec.value())
+                            + ", msg=" + ec.message() + ")");
             return;
         }
 
         if (debug_activated)
         {
-            _logger->Debug("Adapter >> SIL Kit: "
+            _logger->Debug(
+                "Adapter >> SIL Kit: "
                 + std::string(reinterpret_cast<const char*>(_data_buffer_toPublisher.data() + SilKitHeaderSize),
                               bytes_received));
         }
@@ -50,10 +52,8 @@ void SocketToBytesPubSubAdapter::DoReceiveFrameFromSocket()
     });
 }
 
-SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_context,
-                                                       SilKit::IParticipant* participant,
-                                                       const ParsedPubSubConfig& cfg,
-                                                       bool enableDomainSockets)
+SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_context, SilKit::IParticipant* participant,
+                                                       const ParsedPubSubConfig& cfg, bool enableDomainSockets)
     : SocketToPubSubAdapter(io_context, participant, cfg.publisherName, cfg.pubSpec, cfg.subscriberName, cfg.subSpec)
 {
     try
@@ -78,9 +78,11 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
         std::ostringstream error_message;
         error_message << e.what() << std::endl;
         if (enableDomainSockets)
-            error_message << "Error encountered while trying to connect to Unix Domain Socket at \"" << cfg.address << '"';
+            error_message << "Error encountered while trying to connect to Unix Domain Socket at \"" << cfg.address
+                          << '"';
         else
-            error_message << "Error encountered while trying to connect to socket at \"" << cfg.address << ':' << cfg.port << '"';
+            error_message << "Error encountered while trying to connect to socket at \"" << cfg.address << ':'
+                          << cfg.port << '"';
         throw std::runtime_error(error_message.str());
     }
     _logger->Info("Socket connection successfully established");
@@ -88,11 +90,12 @@ SocketToBytesPubSubAdapter::SocketToBytesPubSubAdapter(asio::io_context& io_cont
 }
 
 std::unique_ptr<SocketToBytesPubSubAdapter> SocketToBytesPubSubAdapter::parseArgument(
-    char* chardevSocketTransmitterArg, std::set<std::string>& alreadyProvidedSockets, const std::string& participantName,
-    asio::io_context& ioContext, SilKit::IParticipant* participant, SilKit::Services::Logging::ILogger* logger,
-    bool isUnixSocket)
+    char* chardevSocketTransmitterArg, std::set<std::string>& alreadyProvidedSockets,
+    const std::string& participantName, asio::io_context& ioContext, SilKit::IParticipant* participant,
+    SilKit::Services::Logging::ILogger* logger, bool isUnixSocket)
 {
-    auto cfg = SocketToPubSubAdapter::parseArgument(chardevSocketTransmitterArg, alreadyProvidedSockets, participantName, logger, isUnixSocket);
+    auto cfg = SocketToPubSubAdapter::parseArgument(chardevSocketTransmitterArg, alreadyProvidedSockets,
+                                                    participantName, logger, isUnixSocket);
 
     std::string debugPrefix;
     if (isUnixSocket)
@@ -100,10 +103,10 @@ std::unique_ptr<SocketToBytesPubSubAdapter> SocketToBytesPubSubAdapter::parseArg
     else
         debugPrefix = "Created Bytes-PubSub transmitter " + cfg.address + ':' + cfg.port;
 
-    auto newAdapter = std::make_unique<SocketToBytesPubSubAdapter>(
-        ioContext, participant, cfg, isUnixSocket);
+    auto newAdapter = std::make_unique<SocketToBytesPubSubAdapter>(ioContext, participant, cfg, isUnixSocket);
 
-    std::string debug_message = debugPrefix + " <" + cfg.subscriberName + '(' + cfg.subSpec.Topic() + ')' + " >" + cfg.publisherName + '(' + cfg.pubSpec.Topic() + ')';
+    std::string debug_message = debugPrefix + " <" + cfg.subscriberName + '(' + cfg.subSpec.Topic() + ')' + " >"
+                                + cfg.publisherName + '(' + cfg.pubSpec.Topic() + ')';
     logger->Debug(debug_message);
     return newAdapter;
 }

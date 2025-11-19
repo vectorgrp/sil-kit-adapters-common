@@ -29,10 +29,8 @@ class SocketToBytesPubSubAdapter : public SocketToPubSubAdapter
 
 public:
     using ParsedPubSubConfig = SocketToPubSubAdapter::ParsedPubSubConfig;
-    SocketToBytesPubSubAdapter(asio::io_context& io_context,
-                               SilKit::IParticipant* participant,
-                               const ParsedPubSubConfig& cfg,
-                               bool enableDomainSockets);
+    SocketToBytesPubSubAdapter(asio::io_context& io_context, SilKit::IParticipant* participant,
+                               const ParsedPubSubConfig& cfg, bool enableDomainSockets);
 
     /// <summary>
     /// Parse the complex string given as the argument requesting an adaptation from a socket to a publisher/subscriber.
@@ -44,9 +42,9 @@ public:
     /// <param name="participant">Passed to constructor of class SocketToBytesPubSubAdapter.</param>
     /// <param name="logger">Used for printing logging info.</param>
     /// <returns>A pointer to the created SocketToBytesPubSubAdapter.</returns>
-    static std::unique_ptr<SocketToBytesPubSubAdapter> parseArgument(char* chardevSocketTransmitterArg,
-        std::set<std::string>& alreadyProvidedSockets, const std::string& participantName,
-        asio::io_context& ioContext, SilKit::IParticipant* participant,
+    static std::unique_ptr<SocketToBytesPubSubAdapter> parseArgument(
+        char* chardevSocketTransmitterArg, std::set<std::string>& alreadyProvidedSockets,
+        const std::string& participantName, asio::io_context& ioContext, SilKit::IParticipant* participant,
         SilKit::Services::Logging::ILogger* logger, bool isUnixSocket);
 
     void WriteOutbound(const uint8_t* data, size_t size) override;

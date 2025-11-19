@@ -35,12 +35,9 @@ protected:
         PubSubSpec subSpec;
     };
 
-    SocketToPubSubAdapter(asio::io_context& ioContext,
-                          SilKit::IParticipant* participant,
-                          const std::string& publisherName,
-                          const PubSubSpec& pubSpec,
-                          const std::string& subscriberName,
-                          const PubSubSpec& subSpec)
+    SocketToPubSubAdapter(asio::io_context& ioContext, SilKit::IParticipant* participant,
+                          const std::string& publisherName, const PubSubSpec& pubSpec,
+                          const std::string& subscriberName, const PubSubSpec& subSpec)
         : _ioContext{&ioContext}
         , _socket{ioContext}
         , _logger{participant->GetLogger()}
@@ -49,10 +46,11 @@ protected:
         , _pubSpec{pubSpec}
         , _subscriberName{subscriberName}
         , _subSpec{subSpec}
-        , _publisher{nullptr} 
+        , _publisher{nullptr}
         , _subscriber{nullptr}
         , _debugEnabled{_logger->GetLogLevel() <= SilKit::Services::Logging::Level::Debug}
-    {}
+    {
+    }
 
     virtual ~SocketToPubSubAdapter() = default;
 
@@ -66,11 +64,9 @@ protected:
     void OnSocketConnected();
     void SerializeAndPublish(uint8_t* bufferBegin, std::size_t payloadSize);
     void ShutdownAdapter(const std::string& logMessage);
-    static ParsedPubSubConfig parseArgument(char* rawArg,
-                                              std::set<std::string>& alreadyProvidedSockets,
-                                              const std::string& participantName,
-                                              SilKit::Services::Logging::ILogger* logger,
-                                              bool isUnixSocket);
+    static ParsedPubSubConfig parseArgument(char* rawArg, std::set<std::string>& alreadyProvidedSockets,
+                                            const std::string& participantName,
+                                            SilKit::Services::Logging::ILogger* logger, bool isUnixSocket);
 
     template <class Container>
     void HandleInboundImpl(Container& buffer, const SilKit::Services::PubSub::DataMessageEvent& evt)
@@ -95,7 +91,8 @@ protected:
         {
             if (payloadSize > buffer.size())
             {
-                _logger->Error("Inbound payload (" + std::to_string(payloadSize) + ") exceeds fixed buffer capacity (" + std::to_string(buffer.size()) + ")");
+                _logger->Error("Inbound payload (" + std::to_string(payloadSize) + ") exceeds fixed buffer capacity ("
+                               + std::to_string(buffer.size()) + ")");
                 return;
             }
             for (size_t i = 0; i < payloadSize; ++i)
@@ -124,8 +121,14 @@ protected:
     SilKit::Util::SerDes::Serializer _serializer;
     SilKit::Util::SerDes::Deserializer _deserializer;
     bool _socketConnected{false};
-    void MarkSocketConnected() { _socketConnected = true; }
-    bool IsSocketConnected() const { return _socketConnected; }
+    void MarkSocketConnected()
+    {
+        _socketConnected = true;
+    }
+    bool IsSocketConnected() const
+    {
+        return _socketConnected;
+    }
     bool _debugEnabled{false};
 };
 
