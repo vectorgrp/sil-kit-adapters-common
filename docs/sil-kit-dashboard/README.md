@@ -31,7 +31,7 @@ Installation instructions and requirements for the SIL Kit Dashboard are provide
 
 Once the dashboard is running, open your web browser and go to [http://localhost:8080/dashboard](http://localhost:8080/dashboard) to access the web interface.
 
-> By default, the SIL Kit Dashboard must be run on the same machine as the SIL Kit Registry.
+> To avoid additional configuration effort, it is recommended to run the SIL Kit Dashboard on the same machine as the SIL Kit Registry.
 
 ## Features and Usage
 
