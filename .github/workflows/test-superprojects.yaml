@@ -6,15 +6,23 @@ on:
 
 jobs:
   test-qemu-adapter:
-    uses: pnd/sil-kit-adapters-qemu/.github/workflows/trigger-adapters-ci.yaml@main
+    uses: pnd/sil-kit-adapters-qemu/.github/workflows/trigger-ska-integration-tests.yaml@main
     with:
       common_repo_commit: ${{ github.event.pull_request.head.sha }}
       branch_under_test: main
       linux_runner: '["self-hosted", "linux", "ska", "testing", "qemu"]'
     secrets: inherit
 
+  test-veipc-adapter:
+    uses: pnd/sil-kit-adapters-veipc/.github/workflows/trigger-ska-integration-tests.yaml@main
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      linux_runner: '["self-hosted", "linux", "ska", "testing", "veipc"]'
+    secrets: inherit
+
   test-glio-adapter:
-    uses: pnd/sil-kit-adapters-generic-linux-io/.github/workflows/trigger-adapters-ci.yaml@main
+    uses: pnd/sil-kit-adapters-generic-linux-io/.github/workflows/trigger-ska-integration-tests.yaml@main
     with:
       common_repo_commit: ${{ github.event.pull_request.head.sha }}
       branch_under_test: main
