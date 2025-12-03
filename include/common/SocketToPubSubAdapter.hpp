@@ -68,43 +68,44 @@ protected:
                                             const std::string& participantName,
                                             SilKit::Services::Logging::ILogger* logger, bool isUnixSocket);
 
-    template <class Container>
-    void HandleInboundImpl(Container& buffer, const SilKit::Services::PubSub::DataMessageEvent& evt)
+    void HandleInboundImpl(std::vector<uint8_t>& buffer, const SilKit::Services::PubSub::DataMessageEvent& evt)
     {
         _deserializer.Reset(SilKit::Util::ToStdVector(evt.data));
         const auto payloadSize = _deserializer.BeginArray();
 
-        if constexpr (std::is_same_v<Container, std::vector<uint8_t>>)
+        buffer.resize(payloadSize);
+        for (auto& b : buffer)
         {
-            buffer.resize(payloadSize);
-            for (auto& b : buffer)
-            {
-                b = _deserializer.Deserialize<uint8_t>(8);
-            }
-            if (_debugEnabled)
-            {
-                _logger->Debug("SIL Kit >> Adapter payload size: " + std::to_string(buffer.size()) + " bytes");
-            }
-            WriteOutbound(buffer.data(), buffer.size());
+            b = _deserializer.Deserialize<uint8_t>(8);
         }
-        else
+        if (_debugEnabled)
         {
-            if (payloadSize > buffer.size())
-            {
-                _logger->Error("Inbound payload (" + std::to_string(payloadSize) + ") exceeds fixed buffer capacity ("
-                               + std::to_string(buffer.size()) + ")");
-                return;
-            }
-            for (size_t i = 0; i < payloadSize; ++i)
-            {
-                buffer[i] = _deserializer.Deserialize<uint8_t>(8);
-            }
-            if (_debugEnabled)
-            {
-                _logger->Debug("SIL Kit >> Adapter payload size: " + std::to_string(payloadSize) + " bytes");
-            }
-            WriteOutbound(buffer.data(), payloadSize);
+            _logger->Debug("SIL Kit >> Adapter payload size: " + std::to_string(buffer.size()) + " bytes");
         }
+        WriteOutbound(buffer.data(), buffer.size());
+    }
+
+    template<size_t N>
+    void HandleInboundImpl(std::array<uint8_t, N>& buffer, const SilKit::Services::PubSub::DataMessageEvent& evt)
+    {
+        _deserializer.Reset(SilKit::Util::ToStdVector(evt.data));
+        const auto payloadSize = _deserializer.BeginArray();
+
+        if (payloadSize > buffer.size())
+        {
+            _logger->Error("Inbound payload (" + std::to_string(payloadSize) + ") exceeds fixed buffer capacity ("
+                            + std::to_string(buffer.size()) + ")");
+            return;
+        }
+        for (size_t i = 0; i < payloadSize; ++i)
+        {
+            buffer[i] = _deserializer.Deserialize<uint8_t>(8);
+        }
+        if (_debugEnabled)
+        {
+            _logger->Debug("SIL Kit >> Adapter payload size: " + std::to_string(payloadSize) + " bytes");
+        }
+        WriteOutbound(buffer.data(), payloadSize);
     }
 
 protected:
