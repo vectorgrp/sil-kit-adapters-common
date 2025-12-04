@@ -13,7 +13,7 @@
                 "QNX_BUILD": "true",
                 "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
             },
-            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-x86_64.cmake",
+            "toolchainFile": "${fileDir}/toolchain-qnx-x86_64.cmake",
             "binaryDir": "${sourceDir}/_build/${presetName}",
             "vendor": {
                 "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
@@ -26,13 +26,13 @@
             "inherits": "cross-qnx-x86_64",
             "name": "cross-qnx-armv7",
             "displayName": "QNX cross-build armv7",
-            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-armv7.cmake"
+            "toolchainFile": "${fileDir}/toolchain-qnx-armv7.cmake"
         },
         {
             "inherits": "cross-qnx-x86_64",
             "name": "cross-qnx-aarch64",
             "displayName": "QNX cross-build aarch64",
-            "toolchainFile": "${sourceDir}/common/cmake/toolchain-qnx-aarch64.cmake"
+            "toolchainFile": "${fileDir}/toolchain-qnx-aarch64.cmake"
         }
     ],
     "buildPresets": [
