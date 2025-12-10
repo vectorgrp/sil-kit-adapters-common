@@ -21,6 +21,14 @@ jobs:
       linux_runner: '["self-hosted", "linux", "ska", "testing", "veipc"]'
     secrets: inherit
 
+  test-byte-stream-socket-adapter:
+    uses: pnd/sil-kit-adapters-byte-stream-socket/.github/workflows/trigger-ska-integration-tests.yaml@main
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      linux_runner: '["self-hosted", "linux", "ska", "testing", "byte-stream-socket"]'
+    secrets: inherit
+
   test-glio-adapter:
     uses: pnd/sil-kit-adapters-generic-linux-io/.github/workflows/trigger-ska-integration-tests.yaml@main
     with:
