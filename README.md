@@ -1,6 +1,6 @@
-# Vector SIL Kit Adapters Common repository
+# SIL Kit Adapters Common repository
 This collection of source code represents parts which are used in several Adapters
-of [Vector SIL Kit](https://github.com/vectorgrp/sil-kit/). It can be built using
+of [SIL Kit](https://github.com/vectorgrp/sil-kit/). It can be built using
 ``cmake`` but is intended to be included in a superproject seamlessly.
 
 # How to use

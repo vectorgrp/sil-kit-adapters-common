@@ -1,6 +1,6 @@
-# Contributing to Vector SIL Kit Adapters Common repo
+# Contributing to SIL Kit Adapters Common repo
 
-Welcome and thank you for your interest in contributing to the Vector SIL Kit Adapters Common repo
+Welcome and thank you for your interest in contributing to the SIL Kit Adapters Common repo
 open source project.
 
 We are sorry, but at the moment, we do not accept external contributions until

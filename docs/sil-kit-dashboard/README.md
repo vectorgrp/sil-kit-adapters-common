@@ -5,11 +5,11 @@ This document provides general instructions and information for using the SIL Ki
 
 ## Download the Dashboard
 
-Download the latest SIL Kit Dashboard release from the Vector website: [Vector SIL Kit Dashboard](https://vector.com/sil-kit-dashboard)
+Download the latest SIL Kit Dashboard release from the Vector website: [SIL Kit Dashboard](https://vector.com/sil-kit-dashboard)
 
 After downloading, extract the archive to a convenient location on your system.
 
-> To use the `metrics` feature, you must have Vector SIL Kit 5.0.2 and Vector SIL Kit Dashboard 1.1.0 (or newer versions).
+> To use the `metrics` feature, you must have SIL Kit 5.0.2 and SIL Kit Dashboard 1.1.0 (or newer versions).
 
 ## Install the Dashboard
 
