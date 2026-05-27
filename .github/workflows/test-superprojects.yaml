@@ -36,3 +36,19 @@ jobs:
       branch_under_test: main
       linux_runner: '["self-hosted", "linux", "ska", "testing", "glio"]'
     secrets: inherit
+
+  test-vcan-adapter:
+    uses: pnd/sil-kit-adapters-vcan/.github/workflows/trigger-ska-integration-tests.yaml@main
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      linux_runner: '["self-hosted", "linux", "ska", "testing", "vcan"]'
+    secrets: inherit
+
+  test-tap-adapter:
+    uses: pnd/sil-kit-adapters-tap/.github/workflows/trigger-ska-integration-tests.yaml@main
+    with:
+      common_repo_commit: ${{ github.event.pull_request.head.sha }}
+      branch_under_test: main
+      linux_runner: '["self-hosted", "linux", "ska", "testing", "tap"]'
+    secrets: inherit
