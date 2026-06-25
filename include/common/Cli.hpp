@@ -7,10 +7,14 @@ namespace adapters {
 
 enum ReturnCode
 {
+#ifndef WIN32 // already defined in winerror.h
+    NO_ERROR = 0,
+#endif
     CodeSuccess = 0,
     CodeErrorCli,
     CodeErrorConfiguration,
-    CodeErrorOther
+    CodeErrorOther,
+    CodeErrorFileDescriptor = -1
 };
 
 void promptForExit();
