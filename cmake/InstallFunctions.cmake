@@ -35,6 +35,7 @@ function(install_adapter_source)
         EXCLUDE_FROM_ALL
 
         FILES_MATCHING
+            PATTERN *.ipp
             PATTERN *.cpp
             PATTERN *.hpp
             PATTERN *.cmake
