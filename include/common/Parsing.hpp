@@ -234,10 +234,13 @@ namespace help {
 /// </summary>
 inline std::string TopicSpecificationHelp(const std::string& indent = "    ")
 {
-    return "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n" + indent
-           + "[,<label key>:<optional label value>\n" + indent + " |,<label key>=<mandatory label value>],\n" + indent
-           + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n" + indent
-           + "[,<label key>:<optional label value>\n" + indent + " |,<label key>=<mandatory label value>]";
+    const std::string labelIndent = indent + "   ";
+    const std::string labelAltIndent = indent + "    ";
+    return indent + "[<namespace>::]<toAdapter topic name>[~<subscriber's name>]\n" + labelIndent
+           + "[[,<label key>:<optional label value>\n" + labelAltIndent + "|,<label key>=<mandatory label value>\n"
+           + labelIndent + "]],\n" + indent + "[<namespace>::]<fromAdapter topic name>[~<publisher's name>]\n"
+           + labelIndent + "[[,<label key>:<optional label value>\n" + labelAltIndent
+           + "|,<label key>=<mandatory label value>\n" + labelIndent + "]]";
 }
 
 /// <summary>
@@ -245,8 +248,7 @@ inline std::string TopicSpecificationHelp(const std::string& indent = "    ")
 /// </summary>
 inline std::string SocketAdapterArgumentHelp(const std::string& socketArg, const std::string& indent = "    ")
 {
-    // We prepend a space before the opening '[' so that adapters can concatenate directly after executable name.
-    return " [" + socketArg + "," + TopicSpecificationHelp(indent) + "]";
+    return indent + " " + socketArg + ",\n" + TopicSpecificationHelp(indent);
 }
 
 } // namespace help
